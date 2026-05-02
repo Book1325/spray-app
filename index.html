@@ -593,7 +593,7 @@
 import { initializeApp }      from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 
-// ── Firebase config ───────────────────────────────────────────────────────────
+// ── Firebase config (ห้ามเปลี่ยน) ────────────────────────────────────────────
 const firebaseConfig = {
   apiKey:            "AIzaSyA-Ma3ZkkPliZ7xFwfwSnM0oUrbI1wnXeQ",
   authDomain:        "spray-app-7b3ed.firebaseapp.com",
@@ -606,20 +606,24 @@ const firebaseConfig = {
 const DB_PATH = "spray-app/rows";
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let rows = [];
-let sortAsc    = true;
-let searchQuery = '';
+let rows         = [];
+let sortAsc      = true;
+let searchQuery  = '';
 let pendingAction = null;
-let db = null;
-let fbReady = false;
+let db           = null;
+let fbReady      = false;
 
-// applyingSnapshot = true  → กำลัง apply ข้อมูลจาก Firebase (ห้าม write กลับ)
-// localWriteSeq   = เลขลำดับ write ล่าสุดจากเครื่องนี้
-// ignoreNextSnap  = จำนวน snapshot ที่ควร ignore (เพราะเป็น echo ของ write ตัวเอง)
-let applyingSnapshot = false;
-let writeTimer = null;
-let localWriteSeq = 0;    // เพิ่มทุกครั้งที่ write ขึ้น Firebase
-let ignoreSnaps = 0;      // snapshot ที่ถูก echo กลับมาจาก write ของเราเอง
+// ── Focus / editing lock ───────────────────────────────────────────────────────
+// activeInput: element ที่กำลัง focus อยู่ (null ถ้าไม่มี)
+// เมื่อ onValue ยิงมา ถ้า activeInput ไม่ null → เก็บ snapshot ไว้ก่อน
+// แล้ว apply หลัง blur
+let activeInput      = null;
+let pendingSnapshot  = null;   // snapshot ที่รอ apply หลัง blur
+
+// ── Firebase write guard ───────────────────────────────────────────────────────
+// ignoreSnaps: จำนวน onValue callback ถัดไปที่ต้อง skip (echo ของ write เราเอง)
+let ignoreSnaps  = 0;
+let writeTimer   = null;
 
 const THAI_DAYS   = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -634,7 +638,7 @@ function setConn(status) {
   text.textContent = { connecting:'กำลังเชื่อมต่อ', online:'เชื่อมต่อแล้ว', offline:'ออฟไลน์' }[status] || status;
 }
 
-// ── localStorage helpers ──────────────────────────────────────────────────────
+// ── localStorage ──────────────────────────────────────────────────────────────
 function loadLocal() {
   try { const s = localStorage.getItem('spray_rows'); return s ? JSON.parse(s) : []; }
   catch(e) { return []; }
@@ -643,49 +647,62 @@ function saveLocal() {
   try { localStorage.setItem('spray_rows', JSON.stringify(rows)); } catch(e) {}
 }
 
-// ── Firebase write (debounced, guarded) ── ใช้สำหรับ typing / oninput ────────
+// ── Firebase write: debounced (ใช้กับ typing) ─────────────────────────────────
 function writeToFirebase() {
-  if (!fbReady || !db || applyingSnapshot) return;
+  if (!fbReady || !db) return;
   clearTimeout(writeTimer);
   writeTimer = setTimeout(() => {
-    if (applyingSnapshot) return;   // guard อีกชั้น
-    localWriteSeq++;
-    ignoreSnaps++;                  // snapshot ถัดไปที่ echo กลับมา = ของเราเอง
-    const dataRef = ref(db, DB_PATH);
-    set(dataRef, rows.length ? rows : null)
+    ignoreSnaps++;
+    set(ref(db, DB_PATH), rows.length ? rows : null)
       .catch(err => {
-        console.warn('Firebase write error:', err.message);
         ignoreSnaps = Math.max(0, ignoreSnaps - 1);
-        showToast('บันทึก Cloud ไม่สำเร็จ — ใช้ Local แทน', 'error');
+        console.warn('FB write err:', err.message);
+        showToast('บันทึก Cloud ไม่สำเร็จ', 'error');
       });
-  }, 500);
+  }, 800);
 }
 
-// ── Firebase write ทันที (ไม่ debounce) ── ใช้สำหรับ ลบ / เพิ่ม รายการย่อย ───
+// ── Firebase write: immediate (ใช้กับ addItem / delItem) ─────────────────────
 function writeToFirebaseNow() {
-  if (!fbReady || !db || applyingSnapshot) return;
-  clearTimeout(writeTimer);   // ยกเลิก debounce ที่อาจค้างอยู่
-  localWriteSeq++;
-  ignoreSnaps++;              // กัน echo snapshot
-  const dataRef = ref(db, DB_PATH);
-  set(dataRef, rows.length ? rows : null)
+  if (!fbReady || !db) return;
+  clearTimeout(writeTimer);   // ยกเลิก debounce ที่ค้างอยู่
+  ignoreSnaps++;
+  set(ref(db, DB_PATH), rows.length ? rows : null)
     .catch(err => {
-      console.warn('Firebase write error (immediate):', err.message);
       ignoreSnaps = Math.max(0, ignoreSnaps - 1);
-      showToast('บันทึก Cloud ไม่สำเร็จ — ใช้ Local แทน', 'error');
+      console.warn('FB write (now) err:', err.message);
+      showToast('บันทึก Cloud ไม่สำเร็จ', 'error');
     });
 }
 
-// ── Master save (debounced) ── ใช้ทั่วไป ───────────────────────────────────
+// ── Master save ───────────────────────────────────────────────────────────────
+// saveData()          → localStorage ทันที + Firebase debounce 800ms
+// saveDataImmediate() → localStorage ทันที + Firebase ทันที (ไม่ debounce)
 function saveData() {
   saveLocal();
   writeToFirebase();
 }
-
-// ── Master save ทันที ── ใช้กับ delItem / addItem ──────────────────────────
 function saveDataImmediate() {
   saveLocal();
   writeToFirebaseNow();
+}
+
+// ── Apply snapshot จาก Firebase ───────────────────────────────────────────────
+function applySnapshot(val) {
+  if (Array.isArray(val) && val.length) {
+    rows = val; saveLocal();
+  } else if (val && typeof val === 'object') {
+    rows = Object.values(val); saveLocal();
+  } else {
+    const local = loadLocal();
+    if (local.length) {
+      rows = local;
+      writeToFirebaseNow();   // seed Firebase ด้วยข้อมูล local
+    } else {
+      rows = [];
+    }
+  }
+  renderTable();
 }
 
 // ── Firebase init ─────────────────────────────────────────────────────────────
@@ -694,57 +711,60 @@ try {
   db = getDatabase(app);
   fbReady = true;
 
-  onValue(ref(db, '.info/connected'), snap => {
-    setConn(snap.val() ? 'online' : 'offline');
-  });
+  onValue(ref(db, '.info/connected'), snap => setConn(snap.val() ? 'online' : 'offline'));
 
   onValue(ref(db, DB_PATH), snap => {
-    // ถ้า snapshot นี้เป็น echo ของ write ที่เราส่งไปเอง → ข้ามไป
-    if (ignoreSnaps > 0) {
-      ignoreSnaps--;
-      return;
-    }
-    applyingSnapshot = true;
-    try {
-      const val = snap.val();
-      if (Array.isArray(val) && val.length) {
-        rows = val;
-        saveLocal();
-      } else if (val && typeof val === 'object') {
-        rows = Object.values(val);
-        saveLocal();
-      } else {
-        const local = loadLocal();
-        if (local.length) {
-          rows = local;
-          applyingSnapshot = false;
-          writeToFirebaseNow();
-          applyingSnapshot = true;
-        } else {
-          rows = [];
-        }
-      }
-      renderTable();
-    } finally {
-      applyingSnapshot = false;
+    // skip snapshot ที่เป็น echo ของ write เราเอง
+    if (ignoreSnaps > 0) { ignoreSnaps--; return; }
+
+    const val = snap.val();
+
+    if (activeInput) {
+      // มีช่องพิมพ์กำลัง focus → เก็บไว้รอ blur แล้ว apply
+      pendingSnapshot = val;
+    } else {
+      applySnapshot(val);
     }
   }, err => {
-    console.warn('Firebase listener error:', err.message);
+    console.warn('FB listener err:', err.message);
     setConn('offline');
     rows = loadLocal();
     renderTable();
-    applyingSnapshot = false;
   });
 
 } catch (e) {
-  console.warn('Firebase init failed:', e.message);
+  console.warn('FB init failed:', e.message);
   setConn('offline');
   rows = loadLocal();
   renderTable();
 }
 
+// ── Focus tracking: ติด listener ที่ document (capture phase) ─────────────────
+document.addEventListener('focusin', e => {
+  const el = e.target;
+  if (el.matches('input,textarea,select')) activeInput = el;
+}, true);
+
+document.addEventListener('focusout', e => {
+  // ใช้ setTimeout เพื่อรอให้ focusin ของ element ถัดไปยิงก่อน
+  setTimeout(() => {
+    // ถ้า focus ย้ายไปที่ element ใหม่ที่ก็เป็น input → ยังถือว่ากำลัง edit
+    if (document.activeElement && document.activeElement.matches('input,textarea,select')) {
+      activeInput = document.activeElement;
+    } else {
+      activeInput = null;
+      // apply snapshot ที่รอค้างอยู่ (ถ้ามี)
+      if (pendingSnapshot !== null) {
+        const snap = pendingSnapshot;
+        pendingSnapshot = null;
+        applySnapshot(snap);
+      }
+    }
+  }, 0);
+}, true);
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function genId()    { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function todayStr() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -763,7 +783,7 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Safe math evaluator (รองรับข้อมูลเก่าที่เป็น string เช่น 300+800) ────────
+// ── Safe math (รองรับข้อมูลเก่า เช่น "300+800") ──────────────────────────────
 function safeCalc(expr) {
   if (!expr && expr !== 0) return 0;
   const s = String(expr).trim();
@@ -773,94 +793,67 @@ function safeCalc(expr) {
 }
 function evalExpr(s) {
   let p = 0;
-  const peek = () => s[p];
-  const eat  = () => s[p++];
-  function number() {
-    let n = '';
-    if (peek()==='-') n += eat();
-    while (p<s.length && /[\d.]/.test(peek())) n += eat();
-    return parseFloat(n)||0;
-  }
-  function factor() {
-    if (peek()==='(') { eat(); const v=expr(); if(peek()===')') eat(); return v; }
-    return number();
-  }
-  function term() {
-    let v=factor();
-    while (p<s.length && (peek()==='*'||peek()==='/')) {
-      const op=eat(); const r=factor();
-      v = op==='*' ? v*r : (r?v/r:0);
-    }
-    return v;
-  }
-  function expr() {
-    let v=term();
-    while (p<s.length && (peek()==='+'||peek()==='-')) {
-      v = eat()==='+' ? v+term() : v-term();
-    }
-    return v;
-  }
-  const r = expr();
-  return isFinite(r) ? r : 0;
+  const peek = () => s[p], eat = () => s[p++];
+  function num() { let n=''; if(peek()==='-') n+=eat(); while(p<s.length&&/[\d.]/.test(peek())) n+=eat(); return parseFloat(n)||0; }
+  function factor() { if(peek()==='('){eat();const v=ex();if(peek()===')') eat();return v;} return num(); }
+  function term() { let v=factor(); while(p<s.length&&(peek()==='*'||peek()==='/')) { const op=eat(),r=factor(); v=op==='*'?v*r:(r?v/r:0); } return v; }
+  function ex() { let v=term(); while(p<s.length&&(peek()==='+'||peek()==='-')) { v=eat()==='+' ? v+term() : v-term(); } return v; }
+  const r=ex(); return isFinite(r)?r:0;
 }
 
-// ── คำนวณรายรับจากแถว (รองรับทั้ง incomeItems (ใหม่) และ income string (เก่า)) ───
+// ── Row income / expense ──────────────────────────────────────────────────────
 function getRowIncome(row) {
-  if (Array.isArray(row.incomeItems) && row.incomeItems.length > 0) {
-    return row.incomeItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  }
+  if (Array.isArray(row.incomeItems) && row.incomeItems.length > 0)
+    return row.incomeItems.reduce((s,i) => s+(parseFloat(i.amount)||0), 0);
   return safeCalc(row.income);
 }
-
 function getRowExpense(row) {
-  if (Array.isArray(row.expenseItems) && row.expenseItems.length > 0) {
-    return row.expenseItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  }
+  if (Array.isArray(row.expenseItems) && row.expenseItems.length > 0)
+    return row.expenseItems.reduce((s,i) => s+(parseFloat(i.amount)||0), 0);
   return safeCalc(row.expense);
 }
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 function getStatusBadge(status) {
   const s = status||{};
-  if (s.paid)                   return '<span class="status-badge badge-paid">เก็บเงินแล้ว</span>';
-  if (s.morning && s.evening)   return '<span class="status-badge badge-done">เสร็จครบแล้ว</span>';
-  if (s.morning || s.evening)   return '<span class="status-badge badge-partial">เสร็จบางส่วน</span>';
+  if (s.paid)                 return '<span class="status-badge badge-paid">เก็บเงินแล้ว</span>';
+  if (s.morning && s.evening) return '<span class="status-badge badge-done">เสร็จครบแล้ว</span>';
+  if (s.morning || s.evening) return '<span class="status-badge badge-partial">เสร็จบางส่วน</span>';
   return '<span class="status-badge badge-wait">รอดำเนินการ</span>';
 }
 
-// ── Render income/expense items ───────────────────────────────────────────────
+// ── Render item list (income / expense) ───────────────────────────────────────
 function renderItemList(rowId, items, type) {
-  // type = 'income' | 'expense'
   const isExp = type === 'expense';
-  const btnClass = isExp ? 'exp-btn' : '';
-  const amtClass = isExp ? 'exp' : '';
+  const amtClass   = isExp ? 'exp' : '';
+  const btnClass   = isExp ? 'exp-btn' : '';
   const placeholder = isExp ? 'รายการจ่าย...' : 'ผู้จ่าย/งาน...';
-  const itemsArr = Array.isArray(items) ? items : [];
-  const total = itemsArr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  const arr   = Array.isArray(items) ? items : [];
+  const total = arr.reduce((s,i) => s+(parseFloat(i.amount)||0), 0);
 
-  const rows_html = itemsArr.map((item, idx) => `
+  const itemsHtml = arr.map((item, idx) => `
     <div class="item-row">
       <input class="item-name-input" type="text"
-        value="${escHtml(item.name||'')}"
-        placeholder="${placeholder}"
-        onchange="window._app.upItemField('${rowId}','${type}',${idx},'name',this.value)"
-        oninput="window._app.upItemField('${rowId}','${type}',${idx},'name',this.value)">
+        value="${escHtml(item.name||'')}" placeholder="${placeholder}"
+        oninput="window._app.upItemField('${rowId}','${type}',${idx},'name',this.value)"
+        onchange="window._app.upItemField('${rowId}','${type}',${idx},'name',this.value)">
       <input class="item-amount-input ${amtClass}" type="number" min="0" step="any"
-        value="${escHtml(String(item.amount||''))}"
-        placeholder="0"
-        onchange="window._app.upItemField('${rowId}','${type}',${idx},'amount',this.value)"
-        oninput="window._app.upItemField('${rowId}','${type}',${idx},'amount',this.value)">
-      <button class="btn-item-del" onclick="window._app.delItem('${rowId}','${type}',${idx})" title="ลบรายการ">×</button>
+        value="${escHtml(String(item.amount||''))}" placeholder="0"
+        oninput="window._app.upItemField('${rowId}','${type}',${idx},'amount',this.value)"
+        onchange="window._app.upItemField('${rowId}','${type}',${idx},'amount',this.value)">
+      <button class="btn-item-del"
+        onclick="window._app.delItem('${rowId}','${type}',${idx})" title="ลบรายการ">×</button>
     </div>`).join('');
 
   return `<div class="item-list" id="items-${type}-${rowId}">
-    ${rows_html}
-    <button class="btn-add-item ${btnClass}" onclick="window._app.addItem('${rowId}','${type}')">＋ เพิ่มรายการ</button>
-    ${itemsArr.length > 1 ? `<div class="item-total">รวม: ${formatMoney(total)}</div>` : ''}
+    ${itemsHtml}
+    <button class="btn-add-item ${btnClass}"
+      onclick="window._app.addItem('${rowId}','${type}')">＋ เพิ่มรายการ</button>
+    ${arr.length > 1 ? `<div class="item-total">รวม: ${formatMoney(total)}</div>` : ''}
   </div>`;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// ── Full table render (เรียกเฉพาะตอนที่ไม่มี input focus) ────────────────────
 function renderTable() {
   const tbody = document.getElementById('tableBody');
   const empty = document.getElementById('emptyState');
@@ -869,84 +862,76 @@ function renderTable() {
   const q = searchQuery.toLowerCase();
   const filtered = rows.filter(r => {
     if (!q) return true;
-    const incomeText = (Array.isArray(r.incomeItems) ? r.incomeItems.map(i=>i.name).join(' ') : (r.income||''));
-    const expenseText = (Array.isArray(r.expenseItems) ? r.expenseItems.map(i=>i.name).join(' ') : (r.expense||''));
+    const incTxt = Array.isArray(r.incomeItems)  ? r.incomeItems.map(i=>i.name).join(' ')  : (r.income||'');
+    const expTxt = Array.isArray(r.expenseItems) ? r.expenseItems.map(i=>i.name).join(' ') : (r.expense||'');
     return (r.date||'').includes(q)
         || (r.morning||'').toLowerCase().includes(q)
         || (r.evening||'').toLowerCase().includes(q)
         || (r.note||'').toLowerCase().includes(q)
         || getDayName(r.date).includes(q)
-        || incomeText.toLowerCase().includes(q)
-        || expenseText.toLowerCase().includes(q);
+        || incTxt.toLowerCase().includes(q)
+        || expTxt.toLowerCase().includes(q);
   });
 
   empty.style.display = filtered.length ? 'none' : '';
-
   const today = todayStr();
+
   tbody.innerHTML = filtered.map((row, i) => {
-    const isToday  = row.date === today;
-    const income   = getRowIncome(row);
-    const expense  = getRowExpense(row);
-    const profit   = income - expense;
-    const pClass   = profit>0?'pos':profit<0?'neg':'zero';
-    const st       = row.status||{};
+    const income  = getRowIncome(row);
+    const expense = getRowExpense(row);
+    const profit  = income - expense;
+    const pClass  = profit>0?'pos':profit<0?'neg':'zero';
+    const st      = row.status||{};
+    const incItems = Array.isArray(row.incomeItems)  ? row.incomeItems  : [];
+    const expItems = Array.isArray(row.expenseItems) ? row.expenseItems : [];
 
-    // ถ้ายังไม่มี incomeItems ให้แปลงจาก income string เป็น items หรือเริ่มจาก empty
-    const incomeItems  = Array.isArray(row.incomeItems)  ? row.incomeItems  : [];
-    const expenseItems = Array.isArray(row.expenseItems) ? row.expenseItems : [];
-
-    return `<tr class="${isToday?'today-row':''}" data-id="${row.id}">
+    return `<tr class="${row.date===today?'today-row':''}" data-id="${row.id}">
       <td class="num">${i+1}</td>
       <td class="date-cell">
         <input class="cell-date" type="date" value="${escHtml(row.date||'')}"
-          onchange="window._app.upField('${row.id}','date',this.value)"
-          oninput="window._app.upField('${row.id}','date',this.value)">
+          onchange="window._app.upField('${row.id}','date',this.value)">
         <div class="date-formatted">${formatThaiDate(row.date)}</div>
       </td>
       <td class="day-cell"><span class="day-tag">${getDayName(row.date)}</span></td>
       <td class="work-cell">
         <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเช้า..."
-          onchange="window._app.upField('${row.id}','morning',this.value)"
-          oninput="window._app.upField('${row.id}','morning',this.value)">${escHtml(row.morning||'')}</textarea>
+          oninput="window._app.upFieldSilent('${row.id}','morning',this.value)"
+          onchange="window._app.upField('${row.id}','morning',this.value)">${escHtml(row.morning||'')}</textarea>
       </td>
       <td class="work-cell">
         <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเย็น..."
-          onchange="window._app.upField('${row.id}','evening',this.value)"
-          oninput="window._app.upField('${row.id}','evening',this.value)">${escHtml(row.evening||'')}</textarea>
+          oninput="window._app.upFieldSilent('${row.id}','evening',this.value)"
+          onchange="window._app.upField('${row.id}','evening',this.value)">${escHtml(row.evening||'')}</textarea>
       </td>
       <td class="money-cell">
-        ${renderItemList(row.id, incomeItems, 'income')}
+        ${renderItemList(row.id, incItems, 'income')}
         <div class="money-display" id="inc-total-${row.id}">${formatMoney(income)}</div>
       </td>
       <td class="money-cell">
-        ${renderItemList(row.id, expenseItems, 'expense')}
+        ${renderItemList(row.id, expItems, 'expense')}
         <div class="money-display expense" id="exp-total-${row.id}">${formatMoney(expense)}</div>
       </td>
-      <td class="profit-cell"><div class="profit-display ${pClass}" id="profit-${row.id}">${formatMoney(profit)}</div></td>
+      <td class="profit-cell">
+        <div class="profit-display ${pClass}" id="profit-${row.id}">${formatMoney(profit)}</div>
+      </td>
       <td class="status-cell">
         <div class="status-checks">
           <label class="check-label">
             <input type="checkbox" ${st.morning?'checked':''}
-              onchange="window._app.upStatus('${row.id}','morning',this.checked)">
-            เช้าเสร็จแล้ว
-          </label>
+              onchange="window._app.upStatus('${row.id}','morning',this.checked)">เช้าเสร็จแล้ว</label>
           <label class="check-label">
             <input type="checkbox" ${st.evening?'checked':''}
-              onchange="window._app.upStatus('${row.id}','evening',this.checked)">
-            เย็นเสร็จแล้ว
-          </label>
+              onchange="window._app.upStatus('${row.id}','evening',this.checked)">เย็นเสร็จแล้ว</label>
           <label class="check-label">
             <input type="checkbox" ${st.paid?'checked':''}
-              onchange="window._app.upStatus('${row.id}','paid',this.checked)">
-            เก็บเงินแล้ว
-          </label>
+              onchange="window._app.upStatus('${row.id}','paid',this.checked)">เก็บเงินแล้ว</label>
         </div>
         ${getStatusBadge(st)}
       </td>
       <td class="note-cell">
         <textarea class="cell-textarea" rows="2" placeholder="หมายเหตุ..."
-          onchange="window._app.upField('${row.id}','note',this.value)"
-          oninput="window._app.upField('${row.id}','note',this.value)">${escHtml(row.note||'')}</textarea>
+          oninput="window._app.upFieldSilent('${row.id}','note',this.value)"
+          onchange="window._app.upField('${row.id}','note',this.value)">${escHtml(row.note||'')}</textarea>
       </td>
       <td class="action-cell no-print">
         <div class="action-btns">
@@ -961,34 +946,31 @@ function renderTable() {
   updateMonthly();
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+// ── Dashboard (update แบบ textContent เท่านั้น ไม่ redraw) ───────────────────
 function updateDashboard() {
   let inc=0, exp=0, done=0;
   rows.forEach(r => {
-    inc  += getRowIncome(r);
-    exp  += getRowExpense(r);
-    const s = r.status||{};
-    if (s.morning && s.evening) done++;
+    inc += getRowIncome(r); exp += getRowExpense(r);
+    const s = r.status||{}; if (s.morning && s.evening) done++;
   });
   const pft = inc - exp;
-  const $  = id => document.getElementById(id);
-  if ($('statIncome'))  $('statIncome').textContent  = formatMoney(inc);
-  if ($('statExpense')) $('statExpense').textContent = formatMoney(exp);
-  if ($('statProfit'))  { $('statProfit').textContent = formatMoney(pft); $('statProfit').className = 'stat-value '+(pft>=0?'yellow':'red'); }
-  if ($('statTotal'))   $('statTotal').textContent   = rows.length;
-  if ($('statDone'))    $('statDone').textContent    = done;
-  if ($('statPending')) $('statPending').textContent = rows.length - done;
+  const el = id => document.getElementById(id);
+  if (el('statIncome'))  el('statIncome').textContent  = formatMoney(inc);
+  if (el('statExpense')) el('statExpense').textContent = formatMoney(exp);
+  if (el('statProfit'))  { el('statProfit').textContent = formatMoney(pft); el('statProfit').className = 'stat-value '+(pft>=0?'yellow':'red'); }
+  if (el('statTotal'))   el('statTotal').textContent   = rows.length;
+  if (el('statDone'))    el('statDone').textContent    = done;
+  if (el('statPending')) el('statPending').textContent = rows.length - done;
 }
 
-// ── Monthly Summary ───────────────────────────────────────────────────────────
+// ── Monthly summary ───────────────────────────────────────────────────────────
 function initMonthlySelects() {
   const now = new Date();
   const yearSel = document.getElementById('yearSel');
   if (!yearSel) return;
-  // สร้างตัวเลือกปี ย้อนหลัง 3 ปี + ล่วงหน้า 1 ปี
-  for (let y = now.getFullYear() - 3; y <= now.getFullYear() + 1; y++) {
+  for (let y = now.getFullYear()-3; y <= now.getFullYear()+1; y++) {
     const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y + 543; // พ.ศ.
+    opt.value = y; opt.textContent = y + 543;
     yearSel.appendChild(opt);
   }
   yearSel.value = now.getFullYear();
@@ -996,41 +978,35 @@ function initMonthlySelects() {
 }
 
 function updateMonthly() {
-  const monthSel = document.getElementById('monthSel');
-  const yearSel  = document.getElementById('yearSel');
-  if (!monthSel || !yearSel) return;
-  const selMonth = parseInt(monthSel.value);
-  const selYear  = parseInt(yearSel.value);
-
-  const filtered = rows.filter(r => {
+  const mSel = document.getElementById('monthSel');
+  const ySel = document.getElementById('yearSel');
+  if (!mSel || !ySel) return;
+  const selM = parseInt(mSel.value), selY = parseInt(ySel.value);
+  const filt = rows.filter(r => {
     if (!r.date) return false;
-    const d = new Date(r.date + 'T00:00:00');
-    return d.getMonth() + 1 === selMonth && d.getFullYear() === selYear;
+    const d = new Date(r.date+'T00:00:00');
+    return d.getMonth()+1 === selM && d.getFullYear() === selY;
   });
-
-  let inc = 0, exp = 0;
-  filtered.forEach(r => { inc += getRowIncome(r); exp += getRowExpense(r); });
-  const pft = inc - exp;
-
-  const $ = id => document.getElementById(id);
-  if ($('mIncome'))  $('mIncome').textContent  = formatMoney(inc);
-  if ($('mExpense')) $('mExpense').textContent = formatMoney(exp);
-  if ($('mProfit'))  { $('mProfit').textContent = formatMoney(pft); $('mProfit').className = 'm-stat-value '+(pft>=0?'yellow':'red'); }
-  if ($('mCount'))   $('mCount').textContent  = filtered.length + ' รายการ';
+  let inc=0, exp=0;
+  filt.forEach(r => { inc+=getRowIncome(r); exp+=getRowExpense(r); });
+  const pft = inc-exp;
+  const el = id => document.getElementById(id);
+  if (el('mIncome'))  el('mIncome').textContent  = formatMoney(inc);
+  if (el('mExpense')) el('mExpense').textContent = formatMoney(exp);
+  if (el('mProfit'))  { el('mProfit').textContent = formatMoney(pft); el('mProfit').className = 'm-stat-value '+(pft>=0?'yellow':'red'); }
+  if (el('mCount'))   el('mCount').textContent   = filt.length + ' รายการ';
 }
 
 function setMonthNow() {
   const now = new Date();
-  document.getElementById('monthSel').value = now.getMonth() + 1;
+  document.getElementById('monthSel').value = now.getMonth()+1;
   document.getElementById('yearSel').value  = now.getFullYear();
   updateMonthly();
 }
-
 function setMonthPrev() {
   const now = new Date();
-  let m = now.getMonth(); // 0-based, so this is already "prev" month index
-  let y = now.getFullYear();
-  if (m === 0) { m = 12; y--; } // January -> December prev year
+  let m = now.getMonth(), y = now.getFullYear();   // getMonth() = 0-based → prev
+  if (m === 0) { m = 12; y--; }
   document.getElementById('monthSel').value = m;
   document.getElementById('yearSel').value  = y;
   updateMonthly();
@@ -1039,31 +1015,39 @@ function setMonthPrev() {
 // ── Actions ───────────────────────────────────────────────────────────────────
 function addRow() {
   rows.push({ id:genId(), date:'', morning:'', evening:'',
-    income:'', expense:'',
-    incomeItems:[], expenseItems:[],
+    income:'', expense:'', incomeItems:[], expenseItems:[],
     status:{morning:false,evening:false,paid:false}, note:'' });
   saveData(); renderTable(); showToast('เพิ่มรายการแล้ว','success');
 }
-
 function addTodayRow() {
   rows.push({ id:genId(), date:todayStr(), morning:'', evening:'',
-    income:'', expense:'',
-    incomeItems:[], expenseItems:[],
+    income:'', expense:'', incomeItems:[], expenseItems:[],
     status:{morning:false,evening:false,paid:false}, note:'' });
   saveData(); renderTable(); showToast('เพิ่มรายการวันนี้แล้ว','success');
 }
 
+// upFieldSilent: อัปเดต rows + localStorage เท่านั้น ไม่ redraw ไม่ทำให้หลุด focus
+function upFieldSilent(id, field, value) {
+  const row = rows.find(r=>r.id===id);
+  if (!row) return;
+  row[field] = value;
+  saveLocal();          // บันทึก local ทันที
+  writeToFirebase();    // debounce 800ms
+}
+
+// upField: เรียกตอน onchange (blur แล้ว) ปลอดภัย redraw บางส่วน
 function upField(id, field, value) {
   const row = rows.find(r=>r.id===id);
   if (!row) return;
   row[field] = value;
-  saveData();
+  saveData();   // local + firebase debounce
+  // อัปเดต DOM เฉพาะส่วนที่จำเป็น ไม่ renderTable()
   const tr = document.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
-  if (field==='date') {
-    const dt = tr.querySelector('.day-tag');    if(dt) dt.textContent = getDayName(value);
-    const df = tr.querySelector('.date-formatted'); if(df) df.textContent = formatThaiDate(value);
-    tr.classList.toggle('today-row', value===todayStr());
+  if (field === 'date') {
+    const dt = tr.querySelector('.day-tag');       if(dt) dt.textContent = getDayName(value);
+    const df = tr.querySelector('.date-formatted');if(df) df.textContent = formatThaiDate(value);
+    tr.classList.toggle('today-row', value === todayStr());
     updateMonthly();
   }
 }
@@ -1081,8 +1065,7 @@ function upStatus(id, field, value) {
     if (sc) {
       const tmp = document.createElement('div');
       tmp.innerHTML = getStatusBadge(row.status);
-      if (old) old.replaceWith(tmp.firstChild);
-      else sc.appendChild(tmp.firstChild);
+      if (old) old.replaceWith(tmp.firstChild); else sc.appendChild(tmp.firstChild);
     }
   }
   updateDashboard();
@@ -1092,10 +1075,10 @@ function upStatus(id, field, value) {
 function addItem(rowId, type) {
   const row = rows.find(r=>r.id===rowId);
   if (!row) return;
-  const key = type === 'income' ? 'incomeItems' : 'expenseItems';
+  const key = type==='income' ? 'incomeItems' : 'expenseItems';
   if (!Array.isArray(row[key])) row[key] = [];
   row[key].push({ name:'', amount:'' });
-  saveDataImmediate();              // write ทันที ไม่ debounce
+  saveDataImmediate();
   reRenderItemCell(row, type);
   updateMoneyDisplay(row);
 }
@@ -1103,62 +1086,57 @@ function addItem(rowId, type) {
 function delItem(rowId, type, idx) {
   const row = rows.find(r=>r.id===rowId);
   if (!row) return;
-  const key = type === 'income' ? 'incomeItems' : 'expenseItems';
+  const key = type==='income' ? 'incomeItems' : 'expenseItems';
   if (!Array.isArray(row[key])) return;
   row[key].splice(idx, 1);
-  saveDataImmediate();              // write ทันที ป้องกัน Firebase echo ทับ
+  saveDataImmediate();          // immediate: ป้องกัน echo snapshot ดึงกลับ
   reRenderItemCell(row, type);
   updateMoneyDisplay(row);
 }
 
+// upItemField: oninput/onchange ใน item list
+// → อัปเดต rows + localStorage ทันที แต่ firebase debounce
+// → updateMoneyDisplay แบบ patch ไม่ redraw ทั้งตาราง
 function upItemField(rowId, type, idx, field, value) {
   const row = rows.find(r=>r.id===rowId);
   if (!row) return;
-  const key = type === 'income' ? 'incomeItems' : 'expenseItems';
-  if (!Array.isArray(row[key]) || !row[key][idx]) return;
-  row[key][idx][field] = field === 'amount' ? (value === '' ? '' : parseFloat(value) || 0) : value;
-  saveData();
+  const key = type==='income' ? 'incomeItems' : 'expenseItems';
+  if (!Array.isArray(row[key]) || row[key][idx] === undefined) return;
+  row[key][idx][field] = field==='amount' ? (value===''?'':parseFloat(value)||0) : value;
+  saveLocal();
+  writeToFirebase();
   updateMoneyDisplay(row);
 }
 
 function reRenderItemCell(row, type) {
-  const containerId = `items-${type}-${row.id}`;
-  const el = document.getElementById(containerId);
+  const el = document.getElementById(`items-${type}-${row.id}`);
   if (!el) return;
-  const items = type === 'income' ? (row.incomeItems||[]) : (row.expenseItems||[]);
+  const items = type==='income' ? (row.incomeItems||[]) : (row.expenseItems||[]);
   const tmp = document.createElement('div');
   tmp.innerHTML = renderItemList(row.id, items, type);
   el.replaceWith(tmp.firstChild);
 }
 
+// อัปเดตยอดเงินเฉพาะแถว + dashboard + monthly (ไม่ redraw ตาราง)
 function updateMoneyDisplay(row) {
-  const inc = getRowIncome(row);
-  const exp = getRowExpense(row);
-  const pft = inc - exp;
-
-  const incEl  = document.getElementById(`inc-total-${row.id}`);
-  const expEl  = document.getElementById(`exp-total-${row.id}`);
-  const pftEl  = document.getElementById(`profit-${row.id}`);
-
-  if (incEl) incEl.textContent = formatMoney(inc);
-  if (expEl) expEl.textContent = formatMoney(exp);
-  if (pftEl) {
-    pftEl.textContent = formatMoney(pft);
-    pftEl.className = 'profit-display ' + (pft>0?'pos':pft<0?'neg':'zero');
-  }
+  const inc = getRowIncome(row), exp = getRowExpense(row), pft = inc-exp;
+  const el = id => document.getElementById(id);
+  if (el(`inc-total-${row.id}`)) el(`inc-total-${row.id}`).textContent = formatMoney(inc);
+  if (el(`exp-total-${row.id}`)) el(`exp-total-${row.id}`).textContent = formatMoney(exp);
+  if (el(`profit-${row.id}`))    { el(`profit-${row.id}`).textContent = formatMoney(pft); el(`profit-${row.id}`).className = 'profit-display '+(pft>0?'pos':pft<0?'neg':'zero'); }
   updateDashboard();
   updateMonthly();
 }
 
+// ── Delete / duplicate row ────────────────────────────────────────────────────
 function confirmDelete(id) {
-  pendingAction = () => { rows = rows.filter(r=>r.id!==id); saveData(); renderTable(); showToast('ลบรายการแล้ว','success'); };
+  pendingAction = () => { rows=rows.filter(r=>r.id!==id); saveDataImmediate(); renderTable(); showToast('ลบรายการแล้ว','success'); };
   document.getElementById('modalTitle').textContent = 'ยืนยันการลบ';
   document.getElementById('modalMsg').textContent   = 'คุณต้องการลบรายการนี้ใช่ไหม? การดำเนินการนี้ไม่สามารถย้อนกลับได้';
   document.getElementById('modalConfirmBtn').textContent = 'ลบ';
   document.getElementById('modalConfirmBtn').className   = 'btn danger';
   showModal();
 }
-
 function duplicateRow(id) {
   const row = rows.find(r=>r.id===id);
   if (!row) return;
@@ -1167,10 +1145,9 @@ function duplicateRow(id) {
   rows.splice(rows.indexOf(row)+1, 0, newRow);
   saveData(); renderTable(); showToast('คัดลอกรายการแล้ว','success');
 }
-
 function confirmClearAll() {
   if (!rows.length) { showToast('ไม่มีรายการให้ล้าง','error'); return; }
-  pendingAction = () => { rows=[]; saveData(); renderTable(); showToast('ล้างข้อมูลทั้งหมดแล้ว','success'); };
+  pendingAction = () => { rows=[]; saveDataImmediate(); renderTable(); showToast('ล้างข้อมูลทั้งหมดแล้ว','success'); };
   document.getElementById('modalTitle').textContent = 'ยืนยันการล้างข้อมูล';
   document.getElementById('modalMsg').textContent   = `คุณต้องการล้างรายการทั้งหมด ${rows.length} รายการใช่ไหม? ข้อมูลจะหายถาวร`;
   document.getElementById('modalConfirmBtn').textContent = 'ล้างทั้งหมด';
@@ -1200,11 +1177,10 @@ function exportJSON() {
   const blob = new Blob([JSON.stringify(rows,null,2)],{type:'application/json'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = 'spray_jobs_'+todayStr()+'.json'; a.click();
+  a.href=url; a.download='spray_jobs_'+todayStr()+'.json'; a.click();
   URL.revokeObjectURL(url);
   showToast('ส่งออกข้อมูลแล้ว','success');
 }
-
 function importJSON(e) {
   const file = e.target.files[0]; if(!file) return;
   pendingAction = () => {
@@ -1214,7 +1190,7 @@ function importJSON(e) {
         const data = JSON.parse(ev.target.result);
         if (!Array.isArray(data)) throw new Error('invalid');
         rows = data;
-        saveData(); renderTable();
+        saveDataImmediate(); renderTable();
         showToast(`นำเข้าข้อมูล ${rows.length} รายการแล้ว`,'success');
       } catch(err) { showToast('ไฟล์ไม่ถูกต้อง','error'); }
     };
@@ -1231,7 +1207,6 @@ function importJSON(e) {
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function showModal() { document.getElementById('modalOverlay').classList.add('show'); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); pendingAction = null; }
-
 document.getElementById('modalConfirmBtn').addEventListener('click', () => { if(pendingAction) pendingAction(); closeModal(); });
 document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); });
 
@@ -1240,7 +1215,7 @@ function showToast(msg, type='success') {
   const c = document.getElementById('toastContainer'); if(!c) return;
   const t = document.createElement('div');
   t.className = 'toast '+type;
-  t.innerHTML = (type==='success'?'✅':type==='info'?'ℹ️':'❌') + ' ' + msg;
+  t.innerHTML = (type==='success'?'✅':type==='info'?'ℹ️':'❌')+' '+msg;
   c.appendChild(t);
   setTimeout(()=>t.remove(), 3000);
 }
@@ -1255,18 +1230,18 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 
 // ── Print ─────────────────────────────────────────────────────────────────────
 function printPage() {
-  document.getElementById('printDate').textContent = 'พิมพ์วันที่: ' + formatThaiDate(todayStr());
+  document.getElementById('printDate').textContent = 'พิมพ์วันที่: '+formatThaiDate(todayStr());
   window.print();
 }
 
 // ── Keyboard ──────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
-// ── Public API (bridge for inline onclick) ────────────────────────────────────
+// ── Public API ────────────────────────────────────────────────────────────────
 window._app = {
   addRow, addTodayRow, sortByDate, filterRows,
   exportJSON, importJSON, confirmClearAll,
-  upField, upStatus, confirmDelete, duplicateRow,
+  upField, upFieldSilent, upStatus, confirmDelete, duplicateRow,
   closeModal, printPage,
   addItem, delItem, upItemField,
   updateMonthly, setMonthNow, setMonthPrev
@@ -1276,9 +1251,8 @@ window._app = {
 (function boot() {
   const theme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('themeToggle').textContent = theme==='dark' ? '☀️' : '🌙';
+  document.getElementById('themeToggle').textContent = theme==='dark'?'☀️':'🌙';
   initMonthlySelects();
-  // Show local data immediately while Firebase connects
   rows = loadLocal();
   if (rows.length) renderTable();
 })();
