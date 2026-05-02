@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จดคิวพ่นยาผัก</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --bg4: #252d3d;
+    --border: #2a3347;
+    --text: #e8eaf0;
+    --text2: #8b92a5;
+    --text3: #5a6278;
+    --accent: #4ade80;
+    --accent2: #22c55e;
+    --accent-dim: rgba(74,222,128,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.12);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251,191,36,0.12);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.12);
+    --purple: #a78bfa;
+    --today-bg: rgba(74,222,128,0.06);
+    --today-border: rgba(74,222,128,0.3);
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", "Sarabun", sans-serif;
+  }
+  [data-theme="light"] {
+    --bg: #f5f7fa;
+    --bg2: #ffffff;
+    --bg3: #f0f2f7;
+    --bg4: #e8edf5;
+    --border: #dde2ef;
+    --text: #1a1f2e;
+    --text2: #5a6278;
+    --text3: #9aa0b4;
+    --accent: #16a34a;
+    --accent2: #15803d;
+    --accent-dim: rgba(22,163,74,0.1);
+    --red: #dc2626;
+    --red-dim: rgba(220,38,38,0.08);
+    --yellow: #d97706;
+    --yellow-dim: rgba(217,119,6,0.1);
+    --blue: #2563eb;
+    --blue-dim: rgba(37,99,235,0.1);
+    --purple: #7c3aed;
+    --today-bg: rgba(22,163,74,0.05);
+    --today-border: rgba(22,163,74,0.25);
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* HEADER */
+  .app-header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    height: 60px;
+  }
+  .app-logo {
+    font-size: 1.3rem; font-weight: 600;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .app-logo span { font-size: 1.5rem; }
+  .header-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-icon {
+    width: 38px; height: 38px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover { background: var(--bg4); color: var(--text); border-color: var(--accent); }
+
+  /* MAIN */
+  .main-wrap { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+  /* DASHBOARD */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .stat-label { font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; }
+  .stat-value {
+    font-size: 1.5rem; font-weight: 600;
+    line-height: 1.2;
+  }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-value.purple { color: var(--purple); }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg4); border-color: var(--accent); color: var(--accent); }
+  .btn.primary {
+    background: var(--accent-dim); border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn.primary:hover { background: var(--accent); color: var(--bg); }
+  .btn.danger { color: var(--red); border-color: var(--red-dim); }
+  .btn.danger:hover { background: var(--red-dim); border-color: var(--red); }
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px 8px 36px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.88rem;
+    width: 220px;
+    transition: all 0.2s;
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); background: var(--bg2); width: 260px; }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 1rem; pointer-events: none;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table {
+    width: 100%; border-collapse: collapse;
+    min-width: 1100px;
+  }
+  thead th {
+    background: var(--bg3);
+    padding: 11px 12px;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+  }
+  thead th:hover { color: var(--text); }
+  thead th .sort-arrow { margin-left: 4px; color: var(--text3); }
+  thead th.sorted { color: var(--accent); }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody tr.today-row {
+    background: var(--today-bg);
+    border-left: 3px solid var(--accent);
+  }
+  tbody tr.today-row:hover { background: rgba(74,222,128,0.1); }
+  td {
+    padding: 8px 12px;
+    font-size: 0.88rem;
+    vertical-align: top;
+  }
+  td.num { color: var(--text3); font-size: 0.8rem; text-align: center; width: 40px; }
+  td.date-cell { white-space: nowrap; min-width: 110px; }
+  td.day-cell { white-space: nowrap; min-width: 80px; }
+  td.work-cell { min-width: 160px; max-width: 220px; }
+  td.money-cell { min-width: 100px; text-align: right; }
+  td.profit-cell { min-width: 100px; text-align: right; }
+  td.status-cell { min-width: 140px; }
+  td.note-cell { min-width: 120px; max-width: 180px; }
+  td.action-cell { min-width: 80px; white-space: nowrap; }
+
+  /* INPUTS inside table */
+  .cell-date {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 6px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cell-date:hover, .cell-date:focus {
+    background: var(--bg3);
+    border-color: var(--border);
+    outline: none;
+  }
+  .cell-textarea {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 6px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    width: 100%;
+    resize: none;
+    min-height: 44px;
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+  .cell-textarea:hover, .cell-textarea:focus {
+    background: var(--bg3);
+    border-color: var(--border);
+    outline: none;
+  }
+  .cell-money {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 6px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    width: 100%;
+    text-align: right;
+    transition: all 0.2s;
+  }
+  .cell-money:hover, .cell-money:focus {
+    background: var(--bg3);
+    border-color: var(--border);
+    outline: none;
+  }
+  .cell-money:focus { color: var(--text); }
+  .money-display {
+    color: var(--accent); font-weight: 500;
+    font-size: 0.88rem;
+  }
+  .money-display.expense { color: var(--red); }
+  .profit-display { font-weight: 600; font-size: 0.9rem; }
+  .profit-display.pos { color: var(--accent); }
+  .profit-display.neg { color: var(--red); }
+  .profit-display.zero { color: var(--text3); }
+
+  /* STATUS */
+  .status-checks { display: flex; flex-direction: column; gap: 4px; }
+  .check-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--text2);
+    cursor: pointer; user-select: none;
+  }
+  .check-label input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  .status-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 500;
+    margin-top: 4px; white-space: nowrap;
+  }
+  .badge-wait { background: var(--bg4); color: var(--text3); }
+  .badge-partial { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-done { background: var(--accent-dim); color: var(--accent); }
+  .badge-paid { background: var(--blue-dim); color: var(--blue); }
+
+  /* ACTION BUTTONS */
+  .action-btns { display: flex; gap: 4px; }
+  .btn-sm {
+    width: 30px; height: 30px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .btn-sm:hover { background: var(--bg4); color: var(--text); }
+  .btn-sm.del:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+  .btn-sm.dup:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    padding: 64px 20px;
+    text-align: center;
+    color: var(--text3);
+  }
+  .empty-state .icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 1.1rem; color: var(--text2); margin-bottom: 8px; font-weight: 500; }
+  .empty-state p { font-size: 0.88rem; }
+
+  /* DAY NAME */
+  .day-tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 500;
+    background: var(--bg4); color: var(--text2);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    max-width: 420px; width: 90%;
+    box-shadow: var(--shadow);
+    transform: scale(0.95);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.show .modal { transform: scale(1); }
+  .modal h3 { font-size: 1.05rem; margin-bottom: 10px; }
+  .modal p { font-size: 0.88rem; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px;
+    z-index: 300; display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { border-left: 3px solid var(--accent); }
+  .toast.error { border-left: 3px solid var(--red); }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  /* PRINT */
+  @media print {
+    .no-print, .app-header, .toolbar, .action-cell, thead th:last-child { display: none !important; }
+    .app-header-print { display: block !important; }
+    body { background: white; color: black; }
+    .table-wrap { border: 1px solid #ccc; box-shadow: none; }
+    td, th { border: 1px solid #ddd !important; }
+  }
+  .app-header-print { display: none; text-align: center; margin-bottom: 16px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .main-wrap { padding: 12px; }
+    .dashboard { grid-template-columns: repeat(3, 1fr); }
+    .search-input { width: 160px; }
+    .search-input:focus { width: 180px; }
+    .btn { padding: 8px 10px; font-size: 0.82rem; }
+  }
+  @media (max-width: 480px) {
+    .dashboard { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { gap: 8px; }
+    .app-logo { font-size: 1rem; }
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* Hidden file input */
+  #importFile { display: none; }
+  
+  /* Date display formatted */
+  .date-formatted { font-size: 0.82rem; color: var(--text2); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app-header no-print">
+  <div class="header-inner">
+    <div class="app-logo">
+      <span>🌿</span> แอปจดคิวพ่นยาผัก
+    </div>
+    <div class="header-right">
+      <button class="btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+      <button class="btn-icon no-print" onclick="printPage()" title="พิมพ์">🖨️</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-header-print">
+  <h2>🌿 แอปจดคิวพ่นยาผัก</h2>
+  <p id="printDate"></p>
+</div>
+
+<div class="main-wrap">
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+    <div class="stat-card">
+      <div class="stat-label">รายรับรวม</div>
+      <div class="stat-value green" id="statIncome">฿0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">รายจ่ายรวม</div>
+      <div class="stat-value red" id="statExpense">฿0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">กำไรรวม</div>
+      <div class="stat-value yellow" id="statProfit">฿0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">จำนวนงานทั้งหมด</div>
+      <div class="stat-value blue" id="statTotal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">งานที่เสร็จแล้ว</div>
+      <div class="stat-value green" id="statDone">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">งานที่ยังไม่เสร็จ</div>
+      <div class="stat-value purple" id="statPending">0</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar no-print">
+    <button class="btn primary" onclick="addRow()">＋ เพิ่มรายการ</button>
+    <button class="btn primary" onclick="addTodayRow()">📅 เพิ่มวันนี้</button>
+    <button class="btn" onclick="sortByDate()">↕ เรียงตามวันที่</button>
+    <button class="btn" onclick="exportJSON()">📤 ส่งออก JSON</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">📥 นำเข้า JSON</button>
+    <input type="file" id="importFile" accept=".json" onchange="importJSON(event)">
+    <button class="btn danger" onclick="confirmClearAll()">🗑 ล้างทั้งหมด</button>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="ค้นหา..." oninput="filterRows()">
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th onclick="sortByDate()" class="sortable">วันที่ <span class="sort-arrow">↕</span></th>
+            <th>วัน</th>
+            <th>งานช่วงเช้า</th>
+            <th>งานช่วงเย็น</th>
+            <th style="text-align:right">รายรับ</th>
+            <th style="text-align:right">รายจ่าย</th>
+            <th style="text-align:right">กำไร</th>
+            <th>สถานะ</th>
+            <th>หมายเหตุ</th>
+            <th class="no-print">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="icon">🌱</div>
+      <h3>ยังไม่มีรายการ</h3>
+      <p>กดปุ่ม "เพิ่มรายการ" หรือ "เพิ่มวันนี้" เพื่อเริ่มต้น</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">ยืนยันการลบ</h3>
+    <p id="modalMsg">คุณต้องการลบรายการนี้ใช่ไหม?</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn danger" id="modalConfirmBtn">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// =================== STATE ===================
+let rows = [];
+let sortAsc = true;
+let searchQuery = '';
+let pendingAction = null;
+
+const THAI_DAYS = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+// =================== INIT ===================
+(function init() {
+  loadData();
+  const theme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeIcon(theme);
+  renderTable();
+  updateDashboard();
+})();
+
+// =================== DATA ===================
+function loadData() {
+  try {
+    const saved = localStorage.getItem('spray_rows');
+    if (saved) rows = JSON.parse(saved);
+  } catch(e) { rows = []; }
+}
+
+function saveData() {
+  localStorage.setItem('spray_rows', JSON.stringify(rows));
+}
+
+// =================== HELPERS ===================
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getDayName(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return THAI_DAYS[d.getDay()];
+}
+
+function formatThaiDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDate();
+  const month = THAI_MONTHS[d.getMonth()];
+  const year = d.getFullYear() + 543;
+  return `${day} ${month} ${year}`;
+}
+
+function formatMoney(n) {
+  if (isNaN(n) || n === null || n === undefined) return '฿0';
+  return '฿' + n.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+}
+
+// =================== SAFE CALC ===================
+function safeCalc(expr) {
+  if (!expr || expr.toString().trim() === '') return 0;
+  const s = expr.toString().trim();
+  // Only allow numbers, operators, spaces, decimal
+  if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(s)) return 0;
+  // Tokenize and evaluate safely
+  try {
+    return evalExpr(s.replace(/\s+/g, ''));
+  } catch(e) { return 0; }
+}
+
+function evalExpr(s) {
+  // Simple recursive descent parser
+  let pos = 0;
+  function peek() { return s[pos]; }
+  function consume() { return s[pos++]; }
+
+  function parseNumber() {
+    let num = '';
+    if (peek() === '-') { num += consume(); }
+    while (pos < s.length && /[\d\.]/.test(peek())) num += consume();
+    return parseFloat(num) || 0;
+  }
+
+  function parseFactor() {
+    if (peek() === '(') {
+      consume(); // (
+      const v = parseExpr();
+      if (peek() === ')') consume();
+      return v;
+    }
+    return parseNumber();
+  }
+
+  function parseTerm() {
+    let left = parseFactor();
+    while (pos < s.length && (peek() === '*' || peek() === '/')) {
+      const op = consume();
+      const right = parseFactor();
+      if (op === '*') left *= right;
+      else left = right !== 0 ? left / right : 0;
+    }
+    return left;
+  }
+
+  function parseExpr() {
+    let left = parseTerm();
+    while (pos < s.length && (peek() === '+' || peek() === '-')) {
+      const op = consume();
+      const right = parseTerm();
+      if (op === '+') left += right;
+      else left -= right;
+    }
+    return left;
+  }
+
+  const result = parseExpr();
+  return isFinite(result) ? result : 0;
+}
+
+// =================== STATUS BADGE ===================
+function getStatusBadge(status) {
+  const morning = status.morning;
+  const evening = status.evening;
+  const paid = status.paid;
+  if (paid) return '<span class="status-badge badge-paid">เก็บเงินแล้ว</span>';
+  if (morning && evening) return '<span class="status-badge badge-done">เสร็จครบแล้ว</span>';
+  if (morning || evening) return '<span class="status-badge badge-partial">เสร็จบางส่วน</span>';
+  return '<span class="status-badge badge-wait">รอดำเนินการ</span>';
+}
+
+// =================== RENDER ===================
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+
+  let filtered = rows.filter(r => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (r.date||'').includes(q) ||
+           (r.morning||'').toLowerCase().includes(q) ||
+           (r.evening||'').toLowerCase().includes(q) ||
+           (r.note||'').toLowerCase().includes(q) ||
+           getDayName(r.date).includes(q);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    const today = todayStr();
+    tbody.innerHTML = filtered.map((row, i) => {
+      const isToday = row.date === today;
+      const income = safeCalc(row.income);
+      const expense = safeCalc(row.expense);
+      const profit = income - expense;
+      const profitClass = profit > 0 ? 'pos' : profit < 0 ? 'neg' : 'zero';
+      const badge = getStatusBadge(row.status || {});
+      const dayName = getDayName(row.date);
+      const thaiDate = formatThaiDate(row.date);
+      const idx = rows.indexOf(row);
+      return `<tr class="${isToday ? 'today-row' : ''}" data-id="${row.id}">
+        <td class="num">${i+1}</td>
+        <td class="date-cell">
+          <input class="cell-date" type="date" value="${row.date||''}"
+            onchange="updateField('${row.id}','date',this.value)"
+            oninput="updateField('${row.id}','date',this.value)">
+          <div class="date-formatted">${thaiDate}</div>
+        </td>
+        <td class="day-cell"><span class="day-tag">${dayName}</span></td>
+        <td class="work-cell">
+          <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเช้า..."
+            onchange="updateField('${row.id}','morning',this.value)"
+            oninput="updateField('${row.id}','morning',this.value)">${escHtml(row.morning||'')}</textarea>
+        </td>
+        <td class="work-cell">
+          <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเย็น..."
+            onchange="updateField('${row.id}','evening',this.value)"
+            oninput="updateField('${row.id}','evening',this.value)">${escHtml(row.evening||'')}</textarea>
+        </td>
+        <td class="money-cell">
+          <input class="cell-money" type="text" value="${row.income||''}"
+            placeholder="0"
+            onchange="updateField('${row.id}','income',this.value)"
+            oninput="updateField('${row.id}','income',this.value)">
+          <div class="money-display">${formatMoney(income)}</div>
+        </td>
+        <td class="money-cell">
+          <input class="cell-money" type="text" value="${row.expense||''}"
+            placeholder="0"
+            style="color:var(--red)"
+            onchange="updateField('${row.id}','expense',this.value)"
+            oninput="updateField('${row.id}','expense',this.value)">
+          <div class="money-display expense">${formatMoney(expense)}</div>
+        </td>
+        <td class="profit-cell">
+          <div class="profit-display ${profitClass}">${formatMoney(profit)}</div>
+        </td>
+        <td class="status-cell">
+          <div class="status-checks">
+            <label class="check-label">
+              <input type="checkbox" ${(row.status||{}).morning?'checked':''}
+                onchange="updateStatus('${row.id}','morning',this.checked)">
+              เช้าเสร็จแล้ว
+            </label>
+            <label class="check-label">
+              <input type="checkbox" ${(row.status||{}).evening?'checked':''}
+                onchange="updateStatus('${row.id}','evening',this.checked)">
+              เย็นเสร็จแล้ว
+            </label>
+            <label class="check-label">
+              <input type="checkbox" ${(row.status||{}).paid?'checked':''}
+                onchange="updateStatus('${row.id}','paid',this.checked)">
+              เก็บเงินแล้ว
+            </label>
+          </div>
+          ${badge}
+        </td>
+        <td class="note-cell">
+          <textarea class="cell-textarea" rows="2" placeholder="หมายเหตุ..."
+            onchange="updateField('${row.id}','note',this.value)"
+            oninput="updateField('${row.id}','note',this.value)">${escHtml(row.note||'')}</textarea>
+        </td>
+        <td class="action-cell no-print">
+          <div class="action-btns">
+            <button class="btn-sm dup" onclick="duplicateRow('${row.id}')" title="คัดลอก">📋</button>
+            <button class="btn-sm del" onclick="confirmDelete('${row.id}')" title="ลบ">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  updateDashboard();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// =================== DASHBOARD ===================
+function updateDashboard() {
+  let totalIncome = 0, totalExpense = 0, doneCount = 0;
+  rows.forEach(r => {
+    totalIncome += safeCalc(r.income);
+    totalExpense += safeCalc(r.expense);
+    const s = r.status || {};
+    if (s.morning && s.evening) doneCount++;
+  });
+  const profit = totalIncome - totalExpense;
+  document.getElementById('statIncome').textContent = formatMoney(totalIncome);
+  document.getElementById('statExpense').textContent = formatMoney(totalExpense);
+  document.getElementById('statProfit').textContent = formatMoney(profit);
+  document.getElementById('statProfit').className = 'stat-value ' + (profit >= 0 ? 'yellow' : 'red');
+  document.getElementById('statTotal').textContent = rows.length;
+  document.getElementById('statDone').textContent = doneCount;
+  document.getElementById('statPending').textContent = rows.length - doneCount;
+}
+
+// =================== ACTIONS ===================
+function addRow() {
+  const row = {
+    id: genId(), date: '', morning: '', evening: '',
+    income: '', expense: '', status: { morning: false, evening: false, paid: false }, note: ''
+  };
+  rows.push(row);
+  saveData(); renderTable();
+  showToast('เพิ่มรายการแล้ว', 'success');
+}
+
+function addTodayRow() {
+  const row = {
+    id: genId(), date: todayStr(), morning: '', evening: '',
+    income: '', expense: '', status: { morning: false, evening: false, paid: false }, note: ''
+  };
+  rows.push(row);
+  saveData(); renderTable();
+  showToast('เพิ่มรายการวันนี้แล้ว', 'success');
+}
+
+function updateField(id, field, value) {
+  const row = rows.find(r => r.id === id);
+  if (!row) return;
+  row[field] = value;
+  saveData();
+  // Refresh display parts without full re-render for performance
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (!tr) return;
+  if (field === 'date') {
+    // Update day name and formatted date
+    const dayCell = tr.querySelector('.day-tag');
+    if (dayCell) dayCell.textContent = getDayName(value);
+    const fmtCell = tr.querySelector('.date-formatted');
+    if (fmtCell) fmtCell.textContent = formatThaiDate(value);
+    // Update today highlight
+    tr.classList.toggle('today-row', value === todayStr());
+  }
+  if (field === 'income' || field === 'expense') {
+    const income = safeCalc(rows.find(r=>r.id===id).income);
+    const expense = safeCalc(rows.find(r=>r.id===id).expense);
+    const profit = income - expense;
+    const displays = tr.querySelectorAll('.money-display');
+    if (displays[0]) displays[0].textContent = formatMoney(income);
+    if (displays[1]) { displays[1].textContent = formatMoney(expense); }
+    const profitEl = tr.querySelector('.profit-display');
+    if (profitEl) {
+      profitEl.textContent = formatMoney(profit);
+      profitEl.className = 'profit-display ' + (profit > 0 ? 'pos' : profit < 0 ? 'neg' : 'zero');
+    }
+    updateDashboard();
+  }
+}
+
+function updateStatus(id, field, value) {
+  const row = rows.find(r => r.id === id);
+  if (!row) return;
+  if (!row.status) row.status = {};
+  row.status[field] = value;
+  saveData();
+  // Update badge only
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) {
+    const existing = tr.querySelector('.status-badge');
+    const badge = document.createElement('span');
+    badge.outerHTML = getStatusBadge(row.status);
+    // Replace or insert
+    const statusCell = tr.querySelector('.status-cell');
+    if (statusCell) {
+      const old = statusCell.querySelector('.status-badge');
+      const tmp = document.createElement('div');
+      tmp.innerHTML = getStatusBadge(row.status);
+      if (old) old.replaceWith(tmp.firstChild);
+      else statusCell.appendChild(tmp.firstChild);
+    }
+  }
+  updateDashboard();
+}
+
+function confirmDelete(id) {
+  pendingAction = () => deleteRow(id);
+  document.getElementById('modalTitle').textContent = 'ยืนยันการลบ';
+  document.getElementById('modalMsg').textContent = 'คุณต้องการลบรายการนี้ใช่ไหม? การดำเนินการนี้ไม่สามารถย้อนกลับได้';
+  document.getElementById('modalConfirmBtn').textContent = 'ลบ';
+  document.getElementById('modalConfirmBtn').className = 'btn danger';
+  showModal();
+}
+
+function deleteRow(id) {
+  rows = rows.filter(r => r.id !== id);
+  saveData(); renderTable();
+  showToast('ลบรายการแล้ว', 'success');
+}
+
+function duplicateRow(id) {
+  const row = rows.find(r => r.id === id);
+  if (!row) return;
+  const newRow = JSON.parse(JSON.stringify(row));
+  newRow.id = genId();
+  const idx = rows.indexOf(row);
+  rows.splice(idx + 1, 0, newRow);
+  saveData(); renderTable();
+  showToast('คัดลอกรายการแล้ว', 'success');
+}
+
+function confirmClearAll() {
+  if (rows.length === 0) { showToast('ไม่มีรายการให้ล้าง', 'error'); return; }
+  pendingAction = () => { rows = []; saveData(); renderTable(); showToast('ล้างข้อมูลทั้งหมดแล้ว', 'success'); };
+  document.getElementById('modalTitle').textContent = 'ยืนยันการล้างข้อมูล';
+  document.getElementById('modalMsg').textContent = `คุณต้องการล้างรายการทั้งหมด ${rows.length} รายการใช่ไหม? ข้อมูลจะหายถาวร`;
+  document.getElementById('modalConfirmBtn').textContent = 'ล้างทั้งหมด';
+  document.getElementById('modalConfirmBtn').className = 'btn danger';
+  showModal();
+}
+
+// =================== SORT ===================
+function sortByDate() {
+  rows.sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+  });
+  sortAsc = !sortAsc;
+  saveData(); renderTable();
+}
+
+// =================== SEARCH ===================
+function filterRows() {
+  searchQuery = document.getElementById('searchInput').value;
+  renderTable();
+}
+
+// =================== EXPORT/IMPORT ===================
+function exportJSON() {
+  if (rows.length === 0) { showToast('ไม่มีข้อมูลให้ส่งออก', 'error'); return; }
+  const data = JSON.stringify(rows, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'spray_jobs_' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('ส่งออกข้อมูลแล้ว', 'success');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  pendingAction = () => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!Array.isArray(data)) throw new Error('invalid');
+        rows = data;
+        saveData(); renderTable();
+        showToast(`นำเข้าข้อมูล ${rows.length} รายการแล้ว`, 'success');
+      } catch(err) {
+        showToast('ไฟล์ไม่ถูกต้อง', 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+  document.getElementById('modalTitle').textContent = 'ยืนยันการนำเข้าข้อมูล';
+  document.getElementById('modalMsg').textContent = '⚠️ การนำเข้าจะแทนที่ข้อมูลทั้งหมดที่มีอยู่ กรุณาสำรองข้อมูลก่อน';
+  document.getElementById('modalConfirmBtn').textContent = 'นำเข้า';
+  document.getElementById('modalConfirmBtn').className = 'btn primary';
+  showModal();
+  e.target.value = '';
+}
+
+// =================== MODAL ===================
+function showModal() {
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  pendingAction = null;
+}
+document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+  if (pendingAction) pendingAction();
+  closeModal();
+});
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+// =================== TOAST ===================
+function showToast(msg, type='success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = (type === 'success' ? '✅' : '❌') + ' ' + msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// =================== THEME ===================
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeIcon(next);
+});
+function updateThemeIcon(theme) {
+  document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// =================== PRINT ===================
+function printPage() {
+  document.getElementById('printDate').textContent = 'พิมพ์วันที่: ' + formatThaiDate(todayStr());
+  window.print();
+}
+
+// Keyboard shortcut: Escape closes modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
