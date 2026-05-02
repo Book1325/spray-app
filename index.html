@@ -613,8 +613,13 @@ let pendingAction = null;
 let db = null;
 let fbReady = false;
 
+// applyingSnapshot = true  → กำลัง apply ข้อมูลจาก Firebase (ห้าม write กลับ)
+// localWriteSeq   = เลขลำดับ write ล่าสุดจากเครื่องนี้
+// ignoreNextSnap  = จำนวน snapshot ที่ควร ignore (เพราะเป็น echo ของ write ตัวเอง)
 let applyingSnapshot = false;
 let writeTimer = null;
+let localWriteSeq = 0;    // เพิ่มทุกครั้งที่ write ขึ้น Firebase
+let ignoreSnaps = 0;      // snapshot ที่ถูก echo กลับมาจาก write ของเราเอง
 
 const THAI_DAYS   = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -638,24 +643,49 @@ function saveLocal() {
   try { localStorage.setItem('spray_rows', JSON.stringify(rows)); } catch(e) {}
 }
 
-// ── Firebase write (debounced, guarded) ───────────────────────────────────────
+// ── Firebase write (debounced, guarded) ── ใช้สำหรับ typing / oninput ────────
 function writeToFirebase() {
   if (!fbReady || !db || applyingSnapshot) return;
   clearTimeout(writeTimer);
   writeTimer = setTimeout(() => {
+    if (applyingSnapshot) return;   // guard อีกชั้น
+    localWriteSeq++;
+    ignoreSnaps++;                  // snapshot ถัดไปที่ echo กลับมา = ของเราเอง
     const dataRef = ref(db, DB_PATH);
     set(dataRef, rows.length ? rows : null)
       .catch(err => {
         console.warn('Firebase write error:', err.message);
+        ignoreSnaps = Math.max(0, ignoreSnaps - 1);
         showToast('บันทึก Cloud ไม่สำเร็จ — ใช้ Local แทน', 'error');
       });
   }, 500);
 }
 
-// ── Master save ───────────────────────────────────────────────────────────────
+// ── Firebase write ทันที (ไม่ debounce) ── ใช้สำหรับ ลบ / เพิ่ม รายการย่อย ───
+function writeToFirebaseNow() {
+  if (!fbReady || !db || applyingSnapshot) return;
+  clearTimeout(writeTimer);   // ยกเลิก debounce ที่อาจค้างอยู่
+  localWriteSeq++;
+  ignoreSnaps++;              // กัน echo snapshot
+  const dataRef = ref(db, DB_PATH);
+  set(dataRef, rows.length ? rows : null)
+    .catch(err => {
+      console.warn('Firebase write error (immediate):', err.message);
+      ignoreSnaps = Math.max(0, ignoreSnaps - 1);
+      showToast('บันทึก Cloud ไม่สำเร็จ — ใช้ Local แทน', 'error');
+    });
+}
+
+// ── Master save (debounced) ── ใช้ทั่วไป ───────────────────────────────────
 function saveData() {
   saveLocal();
   writeToFirebase();
+}
+
+// ── Master save ทันที ── ใช้กับ delItem / addItem ──────────────────────────
+function saveDataImmediate() {
+  saveLocal();
+  writeToFirebaseNow();
 }
 
 // ── Firebase init ─────────────────────────────────────────────────────────────
@@ -669,6 +699,11 @@ try {
   });
 
   onValue(ref(db, DB_PATH), snap => {
+    // ถ้า snapshot นี้เป็น echo ของ write ที่เราส่งไปเอง → ข้ามไป
+    if (ignoreSnaps > 0) {
+      ignoreSnaps--;
+      return;
+    }
     applyingSnapshot = true;
     try {
       const val = snap.val();
@@ -683,7 +718,7 @@ try {
         if (local.length) {
           rows = local;
           applyingSnapshot = false;
-          writeToFirebase();
+          writeToFirebaseNow();
           applyingSnapshot = true;
         } else {
           rows = [];
@@ -1060,8 +1095,7 @@ function addItem(rowId, type) {
   const key = type === 'income' ? 'incomeItems' : 'expenseItems';
   if (!Array.isArray(row[key])) row[key] = [];
   row[key].push({ name:'', amount:'' });
-  saveData();
-  // Re-render only the item cell to preserve focus
+  saveDataImmediate();              // write ทันที ไม่ debounce
   reRenderItemCell(row, type);
   updateMoneyDisplay(row);
 }
@@ -1072,7 +1106,7 @@ function delItem(rowId, type, idx) {
   const key = type === 'income' ? 'incomeItems' : 'expenseItems';
   if (!Array.isArray(row[key])) return;
   row[key].splice(idx, 1);
-  saveData();
+  saveDataImmediate();              // write ทันที ป้องกัน Firebase echo ทับ
   reRenderItemCell(row, type);
   updateMoneyDisplay(row);
 }
