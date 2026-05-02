@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แอปจดคิวพ่นยาผัก</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --bg4: #252d3d;
+    --border: #2a3347;
+    --text: #e8eaf0;
+    --text2: #8b92a5;
+    --text3: #5a6278;
+    --accent: #4ade80;
+    --accent2: #22c55e;
+    --accent-dim: rgba(74,222,128,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.12);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251,191,36,0.12);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.12);
+    --purple: #a78bfa;
+    --today-bg: rgba(74,222,128,0.06);
+    --today-border: rgba(74,222,128,0.3);
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", "Sarabun", sans-serif;
+  }
+  [data-theme="light"] {
+    --bg: #f5f7fa;
+    --bg2: #ffffff;
+    --bg3: #f0f2f7;
+    --bg4: #e8edf5;
+    --border: #dde2ef;
+    --text: #1a1f2e;
+    --text2: #5a6278;
+    --text3: #9aa0b4;
+    --accent: #16a34a;
+    --accent2: #15803d;
+    --accent-dim: rgba(22,163,74,0.1);
+    --red: #dc2626;
+    --red-dim: rgba(220,38,38,0.08);
+    --yellow: #d97706;
+    --yellow-dim: rgba(217,119,6,0.1);
+    --blue: #2563eb;
+    --blue-dim: rgba(37,99,235,0.1);
+    --purple: #7c3aed;
+    --today-bg: rgba(22,163,74,0.05);
+    --today-border: rgba(22,163,74,0.25);
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* HEADER */
+  .app-header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    height: 60px;
+  }
+  .app-logo {
+    font-size: 1.3rem; font-weight: 600;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .app-logo span { font-size: 1.5rem; }
+  .header-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-icon {
+    width: 38px; height: 38px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover { background: var(--bg4); color: var(--text); border-color: var(--accent); }
+
+  /* CONNECTION STATUS */
+  .conn-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem; font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text3);
+    white-space: nowrap;
+    transition: all 0.3s;
+  }
+  .conn-badge .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .conn-badge.connecting { color: var(--yellow); border-color: var(--yellow-dim); }
+  .conn-badge.connecting .dot { background: var(--yellow); animation: pulse 1.2s infinite; }
+  .conn-badge.online { color: var(--accent); border-color: var(--accent-dim); }
+  .conn-badge.online .dot { background: var(--accent); }
+  .conn-badge.offline { color: var(--red); border-color: var(--red-dim); }
+  .conn-badge.offline .dot { background: var(--red); }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.75); }
+  }
+
+  /* MAIN */
+  .main-wrap { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+  /* MONTHLY SUMMARY */
+  .monthly-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .monthly-header {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .monthly-title {
+    font-size: 0.9rem; font-weight: 600; color: var(--text2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .month-selects { display: flex; gap: 6px; align-items: center; }
+  .month-select {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 5px 10px;
+    color: var(--text); font-family: var(--font); font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .month-select:focus { outline: none; border-color: var(--accent); }
+  .monthly-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .m-stat {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+  }
+  .m-stat-label { font-size: 0.72rem; color: var(--text3); margin-bottom: 4px; }
+  .m-stat-value { font-size: 1.15rem; font-weight: 600; }
+  .m-stat-value.green { color: var(--accent); }
+  .m-stat-value.red { color: var(--red); }
+  .m-stat-value.yellow { color: var(--yellow); }
+  .m-stat-value.blue { color: var(--blue); }
+
+  /* DASHBOARD */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .stat-label { font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; }
+  .stat-value { font-size: 1.5rem; font-weight: 600; line-height: 1.2; }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-value.purple { color: var(--purple); }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg4); border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .btn.primary:hover { background: var(--accent); color: var(--bg); }
+  .btn.danger { color: var(--red); border-color: var(--red-dim); }
+  .btn.danger:hover { background: var(--red-dim); border-color: var(--red); }
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px 8px 36px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.88rem;
+    width: 220px;
+    transition: all 0.2s;
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); background: var(--bg2); width: 260px; }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 1rem; pointer-events: none;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+  thead th {
+    background: var(--bg3);
+    padding: 11px 12px;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+  }
+  thead th:hover { color: var(--text); }
+  thead th .sort-arrow { margin-left: 4px; color: var(--text3); }
+  thead th.sorted { color: var(--accent); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody tr.today-row { background: var(--today-bg); border-left: 3px solid var(--accent); }
+  tbody tr.today-row:hover { background: rgba(74,222,128,0.1); }
+  td { padding: 8px 12px; font-size: 0.88rem; vertical-align: top; }
+  td.num { color: var(--text3); font-size: 0.8rem; text-align: center; width: 40px; }
+  td.date-cell { white-space: nowrap; min-width: 110px; }
+  td.day-cell { white-space: nowrap; min-width: 80px; }
+  td.work-cell { min-width: 160px; max-width: 220px; }
+  td.money-cell { min-width: 130px; }
+  td.profit-cell { min-width: 100px; text-align: right; }
+  td.status-cell { min-width: 140px; }
+  td.note-cell { min-width: 120px; max-width: 180px; }
+  td.action-cell { min-width: 80px; white-space: nowrap; }
+
+  /* INPUTS */
+  .cell-date {
+    background: transparent; border: 1px solid transparent; border-radius: 6px;
+    padding: 4px 6px; color: var(--text); font-family: var(--font);
+    font-size: 0.85rem; width: 100%; cursor: pointer; transition: all 0.2s;
+  }
+  .cell-date:hover, .cell-date:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+  .cell-textarea {
+    background: transparent; border: 1px solid transparent; border-radius: 6px;
+    padding: 4px 6px; color: var(--text); font-family: var(--font);
+    font-size: 0.85rem; width: 100%; resize: none; min-height: 44px;
+    transition: all 0.2s; line-height: 1.5;
+  }
+  .cell-textarea:hover, .cell-textarea:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+  .cell-input {
+    background: transparent; border: 1px solid transparent; border-radius: 6px;
+    padding: 3px 6px; color: var(--text); font-family: var(--font);
+    font-size: 0.82rem; width: 100%; transition: all 0.2s;
+  }
+  .cell-input:hover, .cell-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+  .cell-input.amount {
+    text-align: right; width: 80px; flex-shrink: 0;
+    color: var(--accent);
+  }
+  .cell-input.amount.exp-amount { color: var(--red); }
+  .money-display { color: var(--accent); font-weight: 600; font-size: 0.88rem; margin-top: 4px; }
+  .money-display.expense { color: var(--red); }
+  .profit-display { font-weight: 600; font-size: 0.9rem; }
+  .profit-display.pos { color: var(--accent); }
+  .profit-display.neg { color: var(--red); }
+  .profit-display.zero { color: var(--text3); }
+
+  /* ITEM LIST (income / expense) */
+  .item-list { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+  .item-row {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .item-name-input {
+    background: transparent; border: 1px solid transparent; border-radius: 4px;
+    padding: 3px 5px; color: var(--text); font-family: var(--font);
+    font-size: 0.8rem; flex: 1; min-width: 60px; transition: all 0.2s;
+  }
+  .item-name-input:hover, .item-name-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+  .item-amount-input {
+    background: transparent; border: 1px solid transparent; border-radius: 4px;
+    padding: 3px 5px; color: var(--accent); font-family: var(--font);
+    font-size: 0.8rem; width: 72px; text-align: right; flex-shrink: 0; transition: all 0.2s;
+  }
+  .item-amount-input.exp { color: var(--red); }
+  .item-amount-input:hover, .item-amount-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+  .btn-item-del {
+    width: 20px; height: 20px; border: none; background: transparent;
+    color: var(--text3); cursor: pointer; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; flex-shrink: 0; transition: all 0.15s; padding: 0;
+  }
+  .btn-item-del:hover { color: var(--red); background: var(--red-dim); }
+  .btn-add-item {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 4px;
+    border: 1px dashed var(--border);
+    background: transparent; color: var(--text3);
+    font-family: var(--font); font-size: 0.76rem;
+    cursor: pointer; transition: all 0.2s; margin-top: 2px;
+  }
+  .btn-add-item:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .btn-add-item.exp-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+  .item-total { font-size: 0.78rem; color: var(--text3); margin-top: 2px; text-align: right; }
+
+  /* STATUS */
+  .status-checks { display: flex; flex-direction: column; gap: 4px; }
+  .check-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--text2); cursor: pointer; user-select: none;
+  }
+  .check-label input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  .status-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 500; margin-top: 4px; white-space: nowrap;
+  }
+  .badge-wait { background: var(--bg4); color: var(--text3); }
+  .badge-partial { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-done { background: var(--accent-dim); color: var(--accent); }
+  .badge-paid { background: var(--blue-dim); color: var(--blue); }
+
+  /* ACTION BUTTONS */
+  .action-btns { display: flex; gap: 4px; }
+  .btn-sm {
+    width: 30px; height: 30px; border: 1px solid var(--border);
+    background: var(--bg3); border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; color: var(--text2); transition: all 0.2s;
+  }
+  .btn-sm:hover { background: var(--bg4); color: var(--text); }
+  .btn-sm.del:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+  .btn-sm.dup:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+
+  /* EMPTY STATE */
+  .empty-state { padding: 64px 20px; text-align: center; color: var(--text3); }
+  .empty-state .icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 1.1rem; color: var(--text2); margin-bottom: 8px; font-weight: 500; }
+  .empty-state p { font-size: 0.88rem; }
+
+  /* DAY TAG */
+  .day-tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 500;
+    background: var(--bg4); color: var(--text2);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; max-width: 420px; width: 90%; box-shadow: var(--shadow);
+    transform: scale(0.95); transition: transform 0.2s;
+  }
+  .modal-overlay.show .modal { transform: scale(1); }
+  .modal h3 { font-size: 1.05rem; margin-bottom: 10px; }
+  .modal p { font-size: 0.88rem; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  }
+  .toast {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 16px;
+    font-size: 0.85rem; color: var(--text); box-shadow: var(--shadow);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { border-left: 3px solid var(--accent); }
+  .toast.error { border-left: 3px solid var(--red); }
+  .toast.info { border-left: 3px solid var(--blue); }
+  @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+  /* PRINT */
+  @media print {
+    .no-print, .app-header, .toolbar, .action-cell, thead th:last-child,
+    .monthly-panel, .btn-add-item, .btn-item-del { display: none !important; }
+    .app-header-print { display: block !important; }
+    body { background: white; color: black; }
+    .table-wrap { border: 1px solid #ccc; box-shadow: none; }
+    td, th { border: 1px solid #ddd !important; }
+  }
+  .app-header-print { display: none; text-align: center; margin-bottom: 16px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .main-wrap { padding: 12px; }
+    .dashboard { grid-template-columns: repeat(3, 1fr); }
+    .monthly-stats { grid-template-columns: repeat(2, 1fr); }
+    .search-input { width: 160px; }
+    .search-input:focus { width: 180px; }
+    .btn { padding: 8px 10px; font-size: 0.82rem; }
+    .conn-badge { font-size: 0.72rem; padding: 4px 8px; }
+  }
+  @media (max-width: 480px) {
+    .dashboard { grid-template-columns: repeat(2, 1fr); }
+    .monthly-stats { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { gap: 6px; }
+    .app-logo { font-size: 1rem; }
+    .conn-text { display: none; }
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+  #importFile { display: none; }
+  .date-formatted { font-size: 0.82rem; color: var(--text2); margin-top: 2px; }
+  .section-divider { height: 1px; background: var(--border); margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="app-header no-print">
+  <div class="header-inner">
+    <div class="app-logo"><span>🌿</span> แอปจดคิวพ่นยาผัก</div>
+    <div class="conn-badge connecting" id="connBadge">
+      <div class="dot"></div>
+      <span class="conn-text" id="connText">กำลังเชื่อมต่อ</span>
+    </div>
+    <div class="header-right">
+      <button class="btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+      <button class="btn-icon no-print" onclick="window._app.printPage()" title="พิมพ์">🖨️</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-header-print">
+  <h2>🌿 แอปจดคิวพ่นยาผัก</h2>
+  <p id="printDate"></p>
+</div>
+
+<div class="main-wrap">
+
+  <!-- MONTHLY SUMMARY -->
+  <div class="monthly-panel no-print">
+    <div class="monthly-header">
+      <div class="monthly-title">📅 สรุปรายเดือน</div>
+      <div class="month-selects">
+        <select class="month-select" id="monthSel" onchange="window._app.updateMonthly()">
+          <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option>
+          <option value="3">มีนาคม</option><option value="4">เมษายน</option>
+          <option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+          <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option>
+          <option value="9">กันยายน</option><option value="10">ตุลาคม</option>
+          <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+        </select>
+        <select class="month-select" id="yearSel" onchange="window._app.updateMonthly()"></select>
+        <button class="btn" style="padding:5px 10px;font-size:0.78rem" onclick="window._app.setMonthNow()">เดือนนี้</button>
+        <button class="btn" style="padding:5px 10px;font-size:0.78rem" onclick="window._app.setMonthPrev()">เดือนก่อน</button>
+      </div>
+    </div>
+    <div class="monthly-stats">
+      <div class="m-stat"><div class="m-stat-label">รายรับรวม</div><div class="m-stat-value green" id="mIncome">฿0</div></div>
+      <div class="m-stat"><div class="m-stat-label">รายจ่ายรวม</div><div class="m-stat-value red" id="mExpense">฿0</div></div>
+      <div class="m-stat"><div class="m-stat-label">กำไรรวม</div><div class="m-stat-value yellow" id="mProfit">฿0</div></div>
+      <div class="m-stat"><div class="m-stat-label">จำนวนงาน</div><div class="m-stat-value blue" id="mCount">0 รายการ</div></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (ทั้งหมด) -->
+  <div class="dashboard">
+    <div class="stat-card"><div class="stat-label">รายรับรวม (ทั้งหมด)</div><div class="stat-value green" id="statIncome">฿0</div></div>
+    <div class="stat-card"><div class="stat-label">รายจ่ายรวม (ทั้งหมด)</div><div class="stat-value red" id="statExpense">฿0</div></div>
+    <div class="stat-card"><div class="stat-label">กำไรรวม (ทั้งหมด)</div><div class="stat-value yellow" id="statProfit">฿0</div></div>
+    <div class="stat-card"><div class="stat-label">จำนวนงานทั้งหมด</div><div class="stat-value blue" id="statTotal">0</div></div>
+    <div class="stat-card"><div class="stat-label">งานที่เสร็จแล้ว</div><div class="stat-value green" id="statDone">0</div></div>
+    <div class="stat-card"><div class="stat-label">งานที่ยังไม่เสร็จ</div><div class="stat-value purple" id="statPending">0</div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar no-print">
+    <button class="btn primary" onclick="window._app.addRow()">＋ เพิ่มรายการ</button>
+    <button class="btn primary" onclick="window._app.addTodayRow()">📅 เพิ่มวันนี้</button>
+    <button class="btn" onclick="window._app.sortByDate()">↕ เรียงตามวันที่</button>
+    <button class="btn" onclick="window._app.exportJSON()">📤 ส่งออก JSON</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">📥 นำเข้า JSON</button>
+    <input type="file" id="importFile" accept=".json" onchange="window._app.importJSON(event)">
+    <button class="btn danger" onclick="window._app.confirmClearAll()">🗑 ล้างทั้งหมด</button>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="ค้นหา..." oninput="window._app.filterRows()">
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th onclick="window._app.sortByDate()">วันที่ <span class="sort-arrow">↕</span></th>
+            <th>วัน</th>
+            <th>งานช่วงเช้า</th>
+            <th>งานช่วงเย็น</th>
+            <th>รายรับ</th>
+            <th>รายจ่าย</th>
+            <th style="text-align:right">กำไร</th>
+            <th>สถานะ</th>
+            <th>หมายเหตุ</th>
+            <th class="no-print">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="icon">🌱</div>
+      <h3>ยังไม่มีรายการ</h3>
+      <p>กดปุ่ม "เพิ่มรายการ" หรือ "เพิ่มวันนี้" เพื่อเริ่มต้น</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">ยืนยันการลบ</h3>
+    <p id="modalMsg">คุณต้องการลบรายการนี้ใช่ไหม?</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="window._app.closeModal()">ยกเลิก</button>
+      <button class="btn danger" id="modalConfirmBtn">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+import { initializeApp }      from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+// ── Firebase config ───────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyA-Ma3ZkkPliZ7xFwfwSnM0oUrbI1wnXeQ",
+  authDomain:        "spray-app-7b3ed.firebaseapp.com",
+  databaseURL:       "https://spray-app-7b3ed-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "spray-app-7b3ed",
+  storageBucket:     "spray-app-7b3ed.firebasestorage.app",
+  messagingSenderId: "569965766139",
+  appId:             "1:569965766139:web:fd054889fc20fd8e41d75e"
+};
+const DB_PATH = "spray-app/rows";
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let rows = [];
+let sortAsc    = true;
+let searchQuery = '';
+let pendingAction = null;
+let db = null;
+let fbReady = false;
+
+let applyingSnapshot = false;
+let writeTimer = null;
+
+const THAI_DAYS   = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                     'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+// ── Connection badge ──────────────────────────────────────────────────────────
+function setConn(status) {
+  const badge = document.getElementById('connBadge');
+  const text  = document.getElementById('connText');
+  if (!badge || !text) return;
+  badge.className = 'conn-badge ' + status;
+  text.textContent = { connecting:'กำลังเชื่อมต่อ', online:'เชื่อมต่อแล้ว', offline:'ออฟไลน์' }[status] || status;
+}
+
+// ── localStorage helpers ──────────────────────────────────────────────────────
+function loadLocal() {
+  try { const s = localStorage.getItem('spray_rows'); return s ? JSON.parse(s) : []; }
+  catch(e) { return []; }
+}
+function saveLocal() {
+  try { localStorage.setItem('spray_rows', JSON.stringify(rows)); } catch(e) {}
+}
+
+// ── Firebase write (debounced, guarded) ───────────────────────────────────────
+function writeToFirebase() {
+  if (!fbReady || !db || applyingSnapshot) return;
+  clearTimeout(writeTimer);
+  writeTimer = setTimeout(() => {
+    const dataRef = ref(db, DB_PATH);
+    set(dataRef, rows.length ? rows : null)
+      .catch(err => {
+        console.warn('Firebase write error:', err.message);
+        showToast('บันทึก Cloud ไม่สำเร็จ — ใช้ Local แทน', 'error');
+      });
+  }, 500);
+}
+
+// ── Master save ───────────────────────────────────────────────────────────────
+function saveData() {
+  saveLocal();
+  writeToFirebase();
+}
+
+// ── Firebase init ─────────────────────────────────────────────────────────────
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  fbReady = true;
+
+  onValue(ref(db, '.info/connected'), snap => {
+    setConn(snap.val() ? 'online' : 'offline');
+  });
+
+  onValue(ref(db, DB_PATH), snap => {
+    applyingSnapshot = true;
+    try {
+      const val = snap.val();
+      if (Array.isArray(val) && val.length) {
+        rows = val;
+        saveLocal();
+      } else if (val && typeof val === 'object') {
+        rows = Object.values(val);
+        saveLocal();
+      } else {
+        const local = loadLocal();
+        if (local.length) {
+          rows = local;
+          applyingSnapshot = false;
+          writeToFirebase();
+          applyingSnapshot = true;
+        } else {
+          rows = [];
+        }
+      }
+      renderTable();
+    } finally {
+      applyingSnapshot = false;
+    }
+  }, err => {
+    console.warn('Firebase listener error:', err.message);
+    setConn('offline');
+    rows = loadLocal();
+    renderTable();
+    applyingSnapshot = false;
+  });
+
+} catch (e) {
+  console.warn('Firebase init failed:', e.message);
+  setConn('offline');
+  rows = loadLocal();
+  renderTable();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function genId()    { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getDayName(ds)    { if (!ds) return ''; return THAI_DAYS[new Date(ds+'T00:00:00').getDay()]; }
+function formatThaiDate(ds) {
+  if (!ds) return '';
+  const d = new Date(ds+'T00:00:00');
+  return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+function formatMoney(n) {
+  if (!isFinite(n)) return '฿0';
+  return '฿' + n.toLocaleString('th-TH', { minimumFractionDigits:0, maximumFractionDigits:2 });
+}
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Safe math evaluator (รองรับข้อมูลเก่าที่เป็น string เช่น 300+800) ────────
+function safeCalc(expr) {
+  if (!expr && expr !== 0) return 0;
+  const s = String(expr).trim();
+  if (!s) return 0;
+  if (!/^[\d\s+\-*/().]+$/.test(s)) return 0;
+  try { return evalExpr(s.replace(/\s+/g,'')); } catch(e) { return 0; }
+}
+function evalExpr(s) {
+  let p = 0;
+  const peek = () => s[p];
+  const eat  = () => s[p++];
+  function number() {
+    let n = '';
+    if (peek()==='-') n += eat();
+    while (p<s.length && /[\d.]/.test(peek())) n += eat();
+    return parseFloat(n)||0;
+  }
+  function factor() {
+    if (peek()==='(') { eat(); const v=expr(); if(peek()===')') eat(); return v; }
+    return number();
+  }
+  function term() {
+    let v=factor();
+    while (p<s.length && (peek()==='*'||peek()==='/')) {
+      const op=eat(); const r=factor();
+      v = op==='*' ? v*r : (r?v/r:0);
+    }
+    return v;
+  }
+  function expr() {
+    let v=term();
+    while (p<s.length && (peek()==='+'||peek()==='-')) {
+      v = eat()==='+' ? v+term() : v-term();
+    }
+    return v;
+  }
+  const r = expr();
+  return isFinite(r) ? r : 0;
+}
+
+// ── คำนวณรายรับจากแถว (รองรับทั้ง incomeItems (ใหม่) และ income string (เก่า)) ───
+function getRowIncome(row) {
+  if (Array.isArray(row.incomeItems) && row.incomeItems.length > 0) {
+    return row.incomeItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  }
+  return safeCalc(row.income);
+}
+
+function getRowExpense(row) {
+  if (Array.isArray(row.expenseItems) && row.expenseItems.length > 0) {
+    return row.expenseItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  }
+  return safeCalc(row.expense);
+}
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+function getStatusBadge(status) {
+  const s = status||{};
+  if (s.paid)                   return '<span class="status-badge badge-paid">เก็บเงินแล้ว</span>';
+  if (s.morning && s.evening)   return '<span class="status-badge badge-done">เสร็จครบแล้ว</span>';
+  if (s.morning || s.evening)   return '<span class="status-badge badge-partial">เสร็จบางส่วน</span>';
+  return '<span class="status-badge badge-wait">รอดำเนินการ</span>';
+}
+
+// ── Render income/expense items ───────────────────────────────────────────────
+function renderItemList(rowId, items, type) {
+  // type = 'income' | 'expense'
+  const isExp = type === 'expense';
+  const btnClass = isExp ? 'exp-btn' : '';
+  const amtClass = isExp ? 'exp' : '';
+  const placeholder = isExp ? 'รายการจ่าย...' : 'ผู้จ่าย/งาน...';
+  const itemsArr = Array.isArray(items) ? items : [];
+  const total = itemsArr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+
+  const rows_html = itemsArr.map((item, idx) => `
+    <div class="item-row">
+      <input class="item-name-input" type="text"
+        value="${escHtml(item.name||'')}"
+        placeholder="${placeholder}"
+        onchange="window._app.upItemField('${rowId}','${type}',${idx},'name',this.value)"
+        oninput="window._app.upItemField('${rowId}','${type}',${idx},'name',this.value)">
+      <input class="item-amount-input ${amtClass}" type="number" min="0" step="any"
+        value="${escHtml(String(item.amount||''))}"
+        placeholder="0"
+        onchange="window._app.upItemField('${rowId}','${type}',${idx},'amount',this.value)"
+        oninput="window._app.upItemField('${rowId}','${type}',${idx},'amount',this.value)">
+      <button class="btn-item-del" onclick="window._app.delItem('${rowId}','${type}',${idx})" title="ลบรายการ">×</button>
+    </div>`).join('');
+
+  return `<div class="item-list" id="items-${type}-${rowId}">
+    ${rows_html}
+    <button class="btn-add-item ${btnClass}" onclick="window._app.addItem('${rowId}','${type}')">＋ เพิ่มรายการ</button>
+    ${itemsArr.length > 1 ? `<div class="item-total">รวม: ${formatMoney(total)}</div>` : ''}
+  </div>`;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  if (!tbody) return;
+
+  const q = searchQuery.toLowerCase();
+  const filtered = rows.filter(r => {
+    if (!q) return true;
+    const incomeText = (Array.isArray(r.incomeItems) ? r.incomeItems.map(i=>i.name).join(' ') : (r.income||''));
+    const expenseText = (Array.isArray(r.expenseItems) ? r.expenseItems.map(i=>i.name).join(' ') : (r.expense||''));
+    return (r.date||'').includes(q)
+        || (r.morning||'').toLowerCase().includes(q)
+        || (r.evening||'').toLowerCase().includes(q)
+        || (r.note||'').toLowerCase().includes(q)
+        || getDayName(r.date).includes(q)
+        || incomeText.toLowerCase().includes(q)
+        || expenseText.toLowerCase().includes(q);
+  });
+
+  empty.style.display = filtered.length ? 'none' : '';
+
+  const today = todayStr();
+  tbody.innerHTML = filtered.map((row, i) => {
+    const isToday  = row.date === today;
+    const income   = getRowIncome(row);
+    const expense  = getRowExpense(row);
+    const profit   = income - expense;
+    const pClass   = profit>0?'pos':profit<0?'neg':'zero';
+    const st       = row.status||{};
+
+    // ถ้ายังไม่มี incomeItems ให้แปลงจาก income string เป็น items หรือเริ่มจาก empty
+    const incomeItems  = Array.isArray(row.incomeItems)  ? row.incomeItems  : [];
+    const expenseItems = Array.isArray(row.expenseItems) ? row.expenseItems : [];
+
+    return `<tr class="${isToday?'today-row':''}" data-id="${row.id}">
+      <td class="num">${i+1}</td>
+      <td class="date-cell">
+        <input class="cell-date" type="date" value="${escHtml(row.date||'')}"
+          onchange="window._app.upField('${row.id}','date',this.value)"
+          oninput="window._app.upField('${row.id}','date',this.value)">
+        <div class="date-formatted">${formatThaiDate(row.date)}</div>
+      </td>
+      <td class="day-cell"><span class="day-tag">${getDayName(row.date)}</span></td>
+      <td class="work-cell">
+        <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเช้า..."
+          onchange="window._app.upField('${row.id}','morning',this.value)"
+          oninput="window._app.upField('${row.id}','morning',this.value)">${escHtml(row.morning||'')}</textarea>
+      </td>
+      <td class="work-cell">
+        <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเย็น..."
+          onchange="window._app.upField('${row.id}','evening',this.value)"
+          oninput="window._app.upField('${row.id}','evening',this.value)">${escHtml(row.evening||'')}</textarea>
+      </td>
+      <td class="money-cell">
+        ${renderItemList(row.id, incomeItems, 'income')}
+        <div class="money-display" id="inc-total-${row.id}">${formatMoney(income)}</div>
+      </td>
+      <td class="money-cell">
+        ${renderItemList(row.id, expenseItems, 'expense')}
+        <div class="money-display expense" id="exp-total-${row.id}">${formatMoney(expense)}</div>
+      </td>
+      <td class="profit-cell"><div class="profit-display ${pClass}" id="profit-${row.id}">${formatMoney(profit)}</div></td>
+      <td class="status-cell">
+        <div class="status-checks">
+          <label class="check-label">
+            <input type="checkbox" ${st.morning?'checked':''}
+              onchange="window._app.upStatus('${row.id}','morning',this.checked)">
+            เช้าเสร็จแล้ว
+          </label>
+          <label class="check-label">
+            <input type="checkbox" ${st.evening?'checked':''}
+              onchange="window._app.upStatus('${row.id}','evening',this.checked)">
+            เย็นเสร็จแล้ว
+          </label>
+          <label class="check-label">
+            <input type="checkbox" ${st.paid?'checked':''}
+              onchange="window._app.upStatus('${row.id}','paid',this.checked)">
+            เก็บเงินแล้ว
+          </label>
+        </div>
+        ${getStatusBadge(st)}
+      </td>
+      <td class="note-cell">
+        <textarea class="cell-textarea" rows="2" placeholder="หมายเหตุ..."
+          onchange="window._app.upField('${row.id}','note',this.value)"
+          oninput="window._app.upField('${row.id}','note',this.value)">${escHtml(row.note||'')}</textarea>
+      </td>
+      <td class="action-cell no-print">
+        <div class="action-btns">
+          <button class="btn-sm dup" onclick="window._app.duplicateRow('${row.id}')" title="คัดลอก">📋</button>
+          <button class="btn-sm del" onclick="window._app.confirmDelete('${row.id}')" title="ลบ">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateDashboard();
+  updateMonthly();
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function updateDashboard() {
+  let inc=0, exp=0, done=0;
+  rows.forEach(r => {
+    inc  += getRowIncome(r);
+    exp  += getRowExpense(r);
+    const s = r.status||{};
+    if (s.morning && s.evening) done++;
+  });
+  const pft = inc - exp;
+  const $  = id => document.getElementById(id);
+  if ($('statIncome'))  $('statIncome').textContent  = formatMoney(inc);
+  if ($('statExpense')) $('statExpense').textContent = formatMoney(exp);
+  if ($('statProfit'))  { $('statProfit').textContent = formatMoney(pft); $('statProfit').className = 'stat-value '+(pft>=0?'yellow':'red'); }
+  if ($('statTotal'))   $('statTotal').textContent   = rows.length;
+  if ($('statDone'))    $('statDone').textContent    = done;
+  if ($('statPending')) $('statPending').textContent = rows.length - done;
+}
+
+// ── Monthly Summary ───────────────────────────────────────────────────────────
+function initMonthlySelects() {
+  const now = new Date();
+  const yearSel = document.getElementById('yearSel');
+  if (!yearSel) return;
+  // สร้างตัวเลือกปี ย้อนหลัง 3 ปี + ล่วงหน้า 1 ปี
+  for (let y = now.getFullYear() - 3; y <= now.getFullYear() + 1; y++) {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + 543; // พ.ศ.
+    yearSel.appendChild(opt);
+  }
+  yearSel.value = now.getFullYear();
+  document.getElementById('monthSel').value = now.getMonth() + 1;
+}
+
+function updateMonthly() {
+  const monthSel = document.getElementById('monthSel');
+  const yearSel  = document.getElementById('yearSel');
+  if (!monthSel || !yearSel) return;
+  const selMonth = parseInt(monthSel.value);
+  const selYear  = parseInt(yearSel.value);
+
+  const filtered = rows.filter(r => {
+    if (!r.date) return false;
+    const d = new Date(r.date + 'T00:00:00');
+    return d.getMonth() + 1 === selMonth && d.getFullYear() === selYear;
+  });
+
+  let inc = 0, exp = 0;
+  filtered.forEach(r => { inc += getRowIncome(r); exp += getRowExpense(r); });
+  const pft = inc - exp;
+
+  const $ = id => document.getElementById(id);
+  if ($('mIncome'))  $('mIncome').textContent  = formatMoney(inc);
+  if ($('mExpense')) $('mExpense').textContent = formatMoney(exp);
+  if ($('mProfit'))  { $('mProfit').textContent = formatMoney(pft); $('mProfit').className = 'm-stat-value '+(pft>=0?'yellow':'red'); }
+  if ($('mCount'))   $('mCount').textContent  = filtered.length + ' รายการ';
+}
+
+function setMonthNow() {
+  const now = new Date();
+  document.getElementById('monthSel').value = now.getMonth() + 1;
+  document.getElementById('yearSel').value  = now.getFullYear();
+  updateMonthly();
+}
+
+function setMonthPrev() {
+  const now = new Date();
+  let m = now.getMonth(); // 0-based, so this is already "prev" month index
+  let y = now.getFullYear();
+  if (m === 0) { m = 12; y--; } // January -> December prev year
+  document.getElementById('monthSel').value = m;
+  document.getElementById('yearSel').value  = y;
+  updateMonthly();
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+function addRow() {
+  rows.push({ id:genId(), date:'', morning:'', evening:'',
+    income:'', expense:'',
+    incomeItems:[], expenseItems:[],
+    status:{morning:false,evening:false,paid:false}, note:'' });
+  saveData(); renderTable(); showToast('เพิ่มรายการแล้ว','success');
+}
+
+function addTodayRow() {
+  rows.push({ id:genId(), date:todayStr(), morning:'', evening:'',
+    income:'', expense:'',
+    incomeItems:[], expenseItems:[],
+    status:{morning:false,evening:false,paid:false}, note:'' });
+  saveData(); renderTable(); showToast('เพิ่มรายการวันนี้แล้ว','success');
+}
+
+function upField(id, field, value) {
+  const row = rows.find(r=>r.id===id);
+  if (!row) return;
+  row[field] = value;
+  saveData();
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (!tr) return;
+  if (field==='date') {
+    const dt = tr.querySelector('.day-tag');    if(dt) dt.textContent = getDayName(value);
+    const df = tr.querySelector('.date-formatted'); if(df) df.textContent = formatThaiDate(value);
+    tr.classList.toggle('today-row', value===todayStr());
+    updateMonthly();
+  }
+}
+
+function upStatus(id, field, value) {
+  const row = rows.find(r=>r.id===id);
+  if (!row) return;
+  if (!row.status) row.status = {};
+  row.status[field] = value;
+  saveData();
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) {
+    const sc  = tr.querySelector('.status-cell');
+    const old = sc && sc.querySelector('.status-badge');
+    if (sc) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = getStatusBadge(row.status);
+      if (old) old.replaceWith(tmp.firstChild);
+      else sc.appendChild(tmp.firstChild);
+    }
+  }
+  updateDashboard();
+}
+
+// ── Item CRUD ─────────────────────────────────────────────────────────────────
+function addItem(rowId, type) {
+  const row = rows.find(r=>r.id===rowId);
+  if (!row) return;
+  const key = type === 'income' ? 'incomeItems' : 'expenseItems';
+  if (!Array.isArray(row[key])) row[key] = [];
+  row[key].push({ name:'', amount:'' });
+  saveData();
+  // Re-render only the item cell to preserve focus
+  reRenderItemCell(row, type);
+  updateMoneyDisplay(row);
+}
+
+function delItem(rowId, type, idx) {
+  const row = rows.find(r=>r.id===rowId);
+  if (!row) return;
+  const key = type === 'income' ? 'incomeItems' : 'expenseItems';
+  if (!Array.isArray(row[key])) return;
+  row[key].splice(idx, 1);
+  saveData();
+  reRenderItemCell(row, type);
+  updateMoneyDisplay(row);
+}
+
+function upItemField(rowId, type, idx, field, value) {
+  const row = rows.find(r=>r.id===rowId);
+  if (!row) return;
+  const key = type === 'income' ? 'incomeItems' : 'expenseItems';
+  if (!Array.isArray(row[key]) || !row[key][idx]) return;
+  row[key][idx][field] = field === 'amount' ? (value === '' ? '' : parseFloat(value) || 0) : value;
+  saveData();
+  updateMoneyDisplay(row);
+}
+
+function reRenderItemCell(row, type) {
+  const containerId = `items-${type}-${row.id}`;
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const items = type === 'income' ? (row.incomeItems||[]) : (row.expenseItems||[]);
+  const tmp = document.createElement('div');
+  tmp.innerHTML = renderItemList(row.id, items, type);
+  el.replaceWith(tmp.firstChild);
+}
+
+function updateMoneyDisplay(row) {
+  const inc = getRowIncome(row);
+  const exp = getRowExpense(row);
+  const pft = inc - exp;
+
+  const incEl  = document.getElementById(`inc-total-${row.id}`);
+  const expEl  = document.getElementById(`exp-total-${row.id}`);
+  const pftEl  = document.getElementById(`profit-${row.id}`);
+
+  if (incEl) incEl.textContent = formatMoney(inc);
+  if (expEl) expEl.textContent = formatMoney(exp);
+  if (pftEl) {
+    pftEl.textContent = formatMoney(pft);
+    pftEl.className = 'profit-display ' + (pft>0?'pos':pft<0?'neg':'zero');
+  }
+  updateDashboard();
+  updateMonthly();
+}
+
+function confirmDelete(id) {
+  pendingAction = () => { rows = rows.filter(r=>r.id!==id); saveData(); renderTable(); showToast('ลบรายการแล้ว','success'); };
+  document.getElementById('modalTitle').textContent = 'ยืนยันการลบ';
+  document.getElementById('modalMsg').textContent   = 'คุณต้องการลบรายการนี้ใช่ไหม? การดำเนินการนี้ไม่สามารถย้อนกลับได้';
+  document.getElementById('modalConfirmBtn').textContent = 'ลบ';
+  document.getElementById('modalConfirmBtn').className   = 'btn danger';
+  showModal();
+}
+
+function duplicateRow(id) {
+  const row = rows.find(r=>r.id===id);
+  if (!row) return;
+  const newRow = JSON.parse(JSON.stringify(row));
+  newRow.id = genId();
+  rows.splice(rows.indexOf(row)+1, 0, newRow);
+  saveData(); renderTable(); showToast('คัดลอกรายการแล้ว','success');
+}
+
+function confirmClearAll() {
+  if (!rows.length) { showToast('ไม่มีรายการให้ล้าง','error'); return; }
+  pendingAction = () => { rows=[]; saveData(); renderTable(); showToast('ล้างข้อมูลทั้งหมดแล้ว','success'); };
+  document.getElementById('modalTitle').textContent = 'ยืนยันการล้างข้อมูล';
+  document.getElementById('modalMsg').textContent   = `คุณต้องการล้างรายการทั้งหมด ${rows.length} รายการใช่ไหม? ข้อมูลจะหายถาวร`;
+  document.getElementById('modalConfirmBtn').textContent = 'ล้างทั้งหมด';
+  document.getElementById('modalConfirmBtn').className   = 'btn danger';
+  showModal();
+}
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+function sortByDate() {
+  rows.sort((a,b)=>{
+    if(!a.date&&!b.date) return 0; if(!a.date) return 1; if(!b.date) return -1;
+    return sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+  });
+  sortAsc = !sortAsc;
+  saveData(); renderTable();
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+function filterRows() {
+  searchQuery = document.getElementById('searchInput').value;
+  renderTable();
+}
+
+// ── Export / Import ───────────────────────────────────────────────────────────
+function exportJSON() {
+  if (!rows.length) { showToast('ไม่มีข้อมูลให้ส่งออก','error'); return; }
+  const blob = new Blob([JSON.stringify(rows,null,2)],{type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'spray_jobs_'+todayStr()+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('ส่งออกข้อมูลแล้ว','success');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0]; if(!file) return;
+  pendingAction = () => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!Array.isArray(data)) throw new Error('invalid');
+        rows = data;
+        saveData(); renderTable();
+        showToast(`นำเข้าข้อมูล ${rows.length} รายการแล้ว`,'success');
+      } catch(err) { showToast('ไฟล์ไม่ถูกต้อง','error'); }
+    };
+    reader.readAsText(file);
+  };
+  document.getElementById('modalTitle').textContent = 'ยืนยันการนำเข้าข้อมูล';
+  document.getElementById('modalMsg').textContent   = '⚠️ การนำเข้าจะแทนที่ข้อมูลทั้งหมดที่มีอยู่ กรุณาสำรองข้อมูลก่อน';
+  document.getElementById('modalConfirmBtn').textContent = 'นำเข้า';
+  document.getElementById('modalConfirmBtn').className   = 'btn primary';
+  showModal();
+  e.target.value = '';
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function showModal() { document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); pendingAction = null; }
+
+document.getElementById('modalConfirmBtn').addEventListener('click', () => { if(pendingAction) pendingAction(); closeModal(); });
+document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); });
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const c = document.getElementById('toastContainer'); if(!c) return;
+  const t = document.createElement('div');
+  t.className = 'toast '+type;
+  t.innerHTML = (type==='success'?'✅':type==='info'?'ℹ️':'❌') + ' ' + msg;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.getElementById('themeToggle').textContent = next==='dark'?'☀️':'🌙';
+});
+
+// ── Print ─────────────────────────────────────────────────────────────────────
+function printPage() {
+  document.getElementById('printDate').textContent = 'พิมพ์วันที่: ' + formatThaiDate(todayStr());
+  window.print();
+}
+
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+// ── Public API (bridge for inline onclick) ────────────────────────────────────
+window._app = {
+  addRow, addTodayRow, sortByDate, filterRows,
+  exportJSON, importJSON, confirmClearAll,
+  upField, upStatus, confirmDelete, duplicateRow,
+  closeModal, printPage,
+  addItem, delItem, upItemField,
+  updateMonthly, setMonthNow, setMonthPrev
+};
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+(function boot() {
+  const theme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle').textContent = theme==='dark' ? '☀️' : '🌙';
+  initMonthlySelects();
+  // Show local data immediately while Firebase connects
+  rows = loadLocal();
+  if (rows.length) renderTable();
+})();
+</script>
+</body>
+</html>
