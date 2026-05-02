@@ -5,645 +5,464 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แอปจดคิวพ่นยาผัก</title>
 <style>
-  :root {
-    --bg: #0f1117;
-    --bg2: #161b27;
-    --bg3: #1e2535;
-    --bg4: #252d3d;
-    --border: #2a3347;
-    --text: #e8eaf0;
-    --text2: #8b92a5;
-    --text3: #5a6278;
-    --accent: #4ade80;
-    --accent2: #22c55e;
-    --accent-dim: rgba(74,222,128,0.12);
-    --red: #f87171;
-    --red-dim: rgba(248,113,113,0.12);
-    --yellow: #fbbf24;
-    --yellow-dim: rgba(251,191,36,0.12);
-    --blue: #60a5fa;
-    --blue-dim: rgba(96,165,250,0.12);
-    --purple: #a78bfa;
-    --teal: #2dd4bf;
-    --teal-dim: rgba(45,212,191,0.12);
-    --orange: #fb923c;
-    --orange-dim: rgba(251,146,60,0.12);
-    --today-bg: rgba(74,222,128,0.06);
-    --today-border: rgba(74,222,128,0.3);
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", "Sarabun", sans-serif;
-  }
-  [data-theme="light"] {
-    --bg: #f5f7fa;
-    --bg2: #ffffff;
-    --bg3: #f0f2f7;
-    --bg4: #e8edf5;
-    --border: #dde2ef;
-    --text: #1a1f2e;
-    --text2: #5a6278;
-    --text3: #9aa0b4;
-    --accent: #16a34a;
-    --accent2: #15803d;
-    --accent-dim: rgba(22,163,74,0.1);
-    --red: #dc2626;
-    --red-dim: rgba(220,38,38,0.08);
-    --yellow: #d97706;
-    --yellow-dim: rgba(217,119,6,0.1);
-    --blue: #2563eb;
-    --blue-dim: rgba(37,99,235,0.1);
-    --purple: #7c3aed;
-    --teal: #0d9488;
-    --teal-dim: rgba(13,148,136,0.1);
-    --orange: #ea580c;
-    --orange-dim: rgba(234,88,12,0.1);
-    --today-bg: rgba(22,163,74,0.05);
-    --today-border: rgba(22,163,74,0.25);
-    --shadow: 0 4px 24px rgba(0,0,0,0.1);
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 15px; }
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.6;
-    transition: background 0.3s, color 0.3s;
-  }
+/* ── TOKENS ─────────────────────────────────────────────────────────────────── */
+:root {
+  --bg:       #0f1117;
+  --bg2:      #161b27;
+  --bg3:      #1e2535;
+  --bg4:      #252d3d;
+  --border:   #2a3347;
+  --text:     #e2e4ec;
+  --text2:    #7b8498;
+  --text3:    #4a5168;
+  --accent:   #4ade80;
+  --accent-d: rgba(74,222,128,0.10);
+  --red:      #f87171;
+  --red-d:    rgba(248,113,113,0.10);
+  --yellow:   #fbbf24;
+  --yellow-d: rgba(251,191,36,0.10);
+  --blue:     #60a5fa;
+  --blue-d:   rgba(96,165,250,0.10);
+  --teal:     #2dd4bf;
+  --teal-d:   rgba(45,212,191,0.10);
+  --purple:   #a78bfa;
+  --shadow:   0 8px 32px rgba(0,0,0,0.45);
+  --shadow-s: 0 2px 8px rgba(0,0,0,0.30);
+  --r:        14px;
+  --r-s:      9px;
+  --font:     -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Thai","Sarabun",sans-serif;
+}
+[data-theme="light"] {
+  --bg:       #f4f6fb;
+  --bg2:      #ffffff;
+  --bg3:      #eef1f8;
+  --bg4:      #e4e8f4;
+  --border:   #d8dded;
+  --text:     #1a1f2e;
+  --text2:    #56607a;
+  --text3:    #9aa0b8;
+  --accent:   #16a34a;
+  --accent-d: rgba(22,163,74,0.08);
+  --red:      #dc2626;
+  --red-d:    rgba(220,38,38,0.07);
+  --yellow:   #d97706;
+  --yellow-d: rgba(217,119,6,0.08);
+  --blue:     #2563eb;
+  --blue-d:   rgba(37,99,235,0.08);
+  --teal:     #0d9488;
+  --teal-d:   rgba(13,148,136,0.08);
+  --purple:   #7c3aed;
+  --shadow:   0 8px 32px rgba(0,0,0,0.10);
+  --shadow-s: 0 2px 8px rgba(0,0,0,0.06);
+}
 
-  /* HEADER */
-  .app-header {
-    position: sticky; top: 0; z-index: 100;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-    box-shadow: var(--shadow-sm);
-  }
-  .header-inner {
-    max-width: 1400px; margin: 0 auto;
-    display: flex; align-items: center; gap: 12px;
-    height: 60px;
-  }
-  .app-logo {
-    font-size: 1.3rem; font-weight: 600;
-    color: var(--accent);
-    display: flex; align-items: center; gap: 8px;
-    white-space: nowrap;
-  }
-  .app-logo span { font-size: 1.5rem; }
-  .header-right {
-    margin-left: auto;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .btn-icon {
-    width: 38px; height: 38px;
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--text2);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-    transition: all 0.2s;
-  }
-  .btn-icon:hover { background: var(--bg4); color: var(--text); border-color: var(--accent); }
+/* ── RESET ────────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;transition:background .25s,color .25s}
+button{font-family:var(--font);cursor:pointer}
+input,textarea,select{font-family:var(--font)}
 
-  /* CONNECTION STATUS */
-  .conn-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.78rem; font-weight: 500;
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--text3);
-    white-space: nowrap;
-    transition: all 0.3s;
-  }
-  .conn-badge .dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--text3);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .conn-badge.connecting { color: var(--yellow); border-color: var(--yellow-dim); }
-  .conn-badge.connecting .dot { background: var(--yellow); animation: pulse 1.2s infinite; }
-  .conn-badge.online { color: var(--accent); border-color: var(--accent-dim); }
-  .conn-badge.online .dot { background: var(--accent); }
-  .conn-badge.offline { color: var(--red); border-color: var(--red-dim); }
-  .conn-badge.offline .dot { background: var(--red); }
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.75); }
-  }
+/* ── HEADER ─────────────────────────────────────────────────────────────── */
+.hdr{position:sticky;top:0;z-index:90;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px}
+.hdr-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px}
+.logo{font-size:1.15rem;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:8px}
 
-  /* MAIN */
-  .main-wrap { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.conn{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-size:.76rem;font-weight:500;border:1px solid var(--border);background:var(--bg3);color:var(--text3);white-space:nowrap;transition:all .25s}
+.conn .dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.conn.online{color:var(--accent);border-color:var(--accent-d)}.conn.online .dot{background:var(--accent)}
+.conn.offline{color:var(--red);border-color:var(--red-d)}.conn.offline .dot{background:var(--red)}
+.conn.connecting{color:var(--yellow);border-color:var(--yellow-d)}.conn.connecting .dot{background:var(--yellow);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
 
-  /* MONTHLY SUMMARY */
-  .monthly-panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    margin-bottom: 16px;
-  }
-  .monthly-header {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-  .monthly-title {
-    font-size: 0.9rem; font-weight: 600; color: var(--text2);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .month-selects { display: flex; gap: 6px; align-items: center; }
-  .month-select {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 5px 10px;
-    color: var(--text); font-family: var(--font); font-size: 0.82rem;
-    cursor: pointer;
-  }
-  .month-select:focus { outline: none; border-color: var(--accent); }
-  .monthly-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 10px;
-  }
-  .m-stat {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 14px;
-  }
-  .m-stat-label { font-size: 0.72rem; color: var(--text3); margin-bottom: 4px; }
-  .m-stat-value { font-size: 1.05rem; font-weight: 600; }
-  .m-stat-value.green { color: var(--accent); }
-  .m-stat-value.red { color: var(--red); }
-  .m-stat-value.yellow { color: var(--yellow); }
-  .m-stat-value.blue { color: var(--blue); }
-  .m-stat-value.teal { color: var(--teal); }
-  .m-stat-value.orange { color: var(--orange); }
-  .m-stat-value.purple { color: var(--purple); }
+.ico-btn{width:36px;height:36px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:var(--r-s);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s}
+.ico-btn:hover{background:var(--bg4);color:var(--text)}
 
-  /* DASHBOARD */
-  .dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px; margin-bottom: 20px;
-  }
-  .stat-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-  .stat-label { font-size: 0.75rem; color: var(--text2); margin-bottom: 6px; }
-  .stat-value { font-size: 1.3rem; font-weight: 600; line-height: 1.2; }
-  .stat-value.green { color: var(--accent); }
-  .stat-value.red { color: var(--red); }
-  .stat-value.yellow { color: var(--yellow); }
-  .stat-value.blue { color: var(--blue); }
-  .stat-value.purple { color: var(--purple); }
-  .stat-value.teal { color: var(--teal); }
-  .stat-value.orange { color: var(--orange); }
+/* ── MAIN ────────────────────────────────────────────────────────────────── */
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
 
-  /* TOOLBAR */
-  .toolbar {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-  }
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 0.88rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .btn:hover { background: var(--bg4); border-color: var(--accent); color: var(--accent); }
-  .btn.primary { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-  .btn.primary:hover { background: var(--accent); color: var(--bg); }
-  .btn.danger { color: var(--red); border-color: var(--red-dim); }
-  .btn.danger:hover { background: var(--red-dim); border-color: var(--red); }
-  .search-wrap { margin-left: auto; position: relative; }
-  .search-input {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px 8px 36px;
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 0.88rem;
-    width: 220px;
-    transition: all 0.2s;
-  }
-  .search-input:focus { outline: none; border-color: var(--accent); background: var(--bg2); width: 260px; }
-  .search-icon {
-    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-    color: var(--text3); font-size: 1rem; pointer-events: none;
-  }
+/* ── STAT GRID ───────────────────────────────────────────────────────────── */
+.stats-section{margin-bottom:20px}
+.stats-label{font-size:.76rem;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.stats-label .month-controls{display:flex;align-items:center;gap:6px;margin-left:auto}
+.month-sel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-s);padding:4px 8px;color:var(--text);font-size:.78rem;cursor:pointer}
+.month-sel:focus{outline:none;border-color:var(--accent)}
 
-  /* TABLE */
-  .table-wrap {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-  }
-  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-  thead th {
-    background: var(--bg3);
-    padding: 11px 12px;
-    text-align: left;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 0.03em;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-  }
-  thead th:hover { color: var(--text); }
-  thead th .sort-arrow { margin-left: 4px; color: var(--text3); }
-  thead th.sorted { color: var(--accent); }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--bg3); }
-  tbody tr.today-row { background: var(--today-bg); border-left: 3px solid var(--accent); }
-  tbody tr.today-row:hover { background: rgba(74,222,128,0.1); }
-  td { padding: 8px 12px; font-size: 0.88rem; vertical-align: top; }
-  td.num { color: var(--text3); font-size: 0.8rem; text-align: center; width: 40px; }
-  td.date-cell { white-space: nowrap; min-width: 110px; }
-  td.day-cell { white-space: nowrap; min-width: 80px; }
-  td.work-cell { min-width: 160px; max-width: 220px; }
-  td.money-cell { min-width: 160px; }
-  td.profit-cell { min-width: 100px; text-align: right; }
-  td.status-cell { min-width: 140px; }
-  td.note-cell { min-width: 120px; max-width: 180px; }
-  td.action-cell { min-width: 80px; white-space: nowrap; }
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;transition:transform .18s}
+.stat-card:hover{transform:translateY(-1px)}
+.sc-label{font-size:.73rem;color:var(--text3);margin-bottom:5px;font-weight:400}
+.sc-val{font-size:1.25rem;font-weight:600;line-height:1.2}
+.sc-val.g{color:var(--accent)}.sc-val.r{color:var(--red)}.sc-val.y{color:var(--yellow)}.sc-val.t{color:var(--teal)}.sc-val.b{color:var(--blue)}.sc-val.p{color:var(--purple)}
+.sc-sub{font-size:.72rem;color:var(--text3);margin-top:3px}
 
-  /* INPUTS */
-  .cell-date {
-    background: transparent; border: 1px solid transparent; border-radius: 6px;
-    padding: 4px 6px; color: var(--text); font-family: var(--font);
-    font-size: 0.85rem; width: 100%; cursor: pointer; transition: all 0.2s;
-  }
-  .cell-date:hover, .cell-date:focus { background: var(--bg3); border-color: var(--border); outline: none; }
-  .cell-textarea {
-    background: transparent; border: 1px solid transparent; border-radius: 6px;
-    padding: 4px 6px; color: var(--text); font-family: var(--font);
-    font-size: 0.85rem; width: 100%; resize: none; min-height: 44px;
-    transition: all 0.2s; line-height: 1.5;
-  }
-  .cell-textarea:hover, .cell-textarea:focus { background: var(--bg3); border-color: var(--border); outline: none; }
-  .cell-input {
-    background: transparent; border: 1px solid transparent; border-radius: 6px;
-    padding: 3px 6px; color: var(--text); font-family: var(--font);
-    font-size: 0.82rem; width: 100%; transition: all 0.2s;
-  }
-  .cell-input:hover, .cell-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
-  .money-display { color: var(--accent); font-weight: 600; font-size: 0.88rem; margin-top: 4px; }
-  .money-display.expense { color: var(--red); }
-  .profit-display { font-weight: 600; font-size: 0.9rem; }
-  .profit-display.pos { color: var(--accent); }
-  .profit-display.neg { color: var(--red); }
-  .profit-display.zero { color: var(--text3); }
+/* detail toggle row for payment breakdown */
+.pay-detail{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.pay-row{display:flex;justify-content:space-between;font-size:.74rem;color:var(--text2);padding:2px 0}
+.pay-row span:last-child{font-weight:500;color:var(--text)}
 
-  /* ITEM LIST (income / expense) */
-  .item-list { display: flex; flex-direction: column; gap: 5px; min-width: 140px; }
+.stats-toggle{background:none;border:none;color:var(--text3);font-size:.74rem;display:flex;align-items:center;gap:4px;padding:4px 0;cursor:pointer;transition:color .15s}
+.stats-toggle:hover{color:var(--text2)}
 
-  /* Income item: name + rai + amount + paymentType + del */
-  .item-row {
-    display: flex; align-items: center; gap: 3px; flex-wrap: nowrap;
-  }
-  .item-name-input {
-    background: transparent; border: 1px solid transparent; border-radius: 4px;
-    padding: 3px 5px; color: var(--text); font-family: var(--font);
-    font-size: 0.78rem; flex: 1; min-width: 50px; transition: all 0.2s;
-  }
-  .item-name-input:hover, .item-name-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+/* ── TOOLBAR ─────────────────────────────────────────────────────────────── */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r-s);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.84rem;font-weight:400;transition:all .18s;white-space:nowrap}
+.btn:hover{background:var(--bg4);border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent-d);border-color:var(--accent);color:var(--accent)}
+.btn.pri:hover{background:var(--accent);color:var(--bg)}
+.btn.danger{color:var(--red);border-color:var(--red-d)}
+.btn.danger:hover{background:var(--red-d);border-color:var(--red)}
+.btn.sm{padding:5px 10px;font-size:.78rem}
 
-  .item-rai-input {
-    background: transparent; border: 1px solid transparent; border-radius: 4px;
-    padding: 3px 4px; color: var(--teal); font-family: var(--font);
-    font-size: 0.78rem; width: 46px; text-align: right; flex-shrink: 0; transition: all 0.2s;
-  }
-  .item-rai-input:hover, .item-rai-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+.srch-wrap{margin-left:auto;position:relative}
+.srch{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-s);padding:7px 12px 7px 34px;color:var(--text);font-size:.84rem;width:200px;transition:all .2s}
+.srch:focus{outline:none;border-color:var(--accent);background:var(--bg2);width:240px}
+.srch-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.95rem;pointer-events:none}
 
-  .item-amount-input {
-    background: transparent; border: 1px solid transparent; border-radius: 4px;
-    padding: 3px 4px; color: var(--accent); font-family: var(--font);
-    font-size: 0.78rem; width: 66px; text-align: right; flex-shrink: 0; transition: all 0.2s;
-  }
-  .item-amount-input.exp { color: var(--red); }
-  .item-amount-input:hover, .item-amount-input:focus { background: var(--bg3); border-color: var(--border); outline: none; }
+/* ── TABLE (desktop) ─────────────────────────────────────────────────────── */
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:.74rem;font-weight:500;color:var(--text3);letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap;user-select:none}
+thead th.sort-col{cursor:pointer}
+thead th.sort-col:hover{color:var(--text2)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody tr.today{background:rgba(74,222,128,0.04);border-left:2px solid var(--accent)}
+[data-theme="light"] tbody tr.today{background:rgba(22,163,74,0.04)}
+td{padding:10px 14px;font-size:.85rem;vertical-align:middle}
+td.num{color:var(--text3);font-size:.76rem;text-align:center;width:36px}
+td.date-c{white-space:nowrap;min-width:100px}
+td.day-c{white-space:nowrap;min-width:70px}
+td.work-c{min-width:120px;max-width:180px}
+td.money-c{min-width:90px;font-weight:500}
+td.profit-c{min-width:90px;text-align:right;font-weight:600}
+td.status-c{min-width:110px}
+td.act-c{min-width:90px;white-space:nowrap}
 
-  .item-pay-select {
-    background: transparent; border: 1px solid transparent; border-radius: 4px;
-    padding: 2px 3px; color: var(--text2); font-family: var(--font);
-    font-size: 0.72rem; flex-shrink: 0; cursor: pointer; transition: all 0.2s;
-    max-width: 52px;
-  }
-  .item-pay-select:hover, .item-pay-select:focus { background: var(--bg3); border-color: var(--border); outline: none; color: var(--text); }
+.cell-date{background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 5px;color:var(--text);font-size:.82rem;width:100%;cursor:pointer;transition:all .18s}
+.cell-date:hover,.cell-date:focus{background:var(--bg3);border-color:var(--border);outline:none}
+.cell-ta{background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 5px;color:var(--text);font-size:.82rem;width:100%;resize:none;min-height:36px;transition:all .18s;line-height:1.5}
+.cell-ta:hover,.cell-ta:focus{background:var(--bg3);border-color:var(--border);outline:none}
 
-  .btn-item-del {
-    width: 18px; height: 18px; border: none; background: transparent;
-    color: var(--text3); cursor: pointer; border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; flex-shrink: 0; transition: all 0.15s; padding: 0;
-  }
-  .btn-item-del:hover { color: var(--red); background: var(--red-dim); }
-  .btn-add-item {
-    display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 8px; border-radius: 4px;
-    border: 1px dashed var(--border);
-    background: transparent; color: var(--text3);
-    font-family: var(--font); font-size: 0.74rem;
-    cursor: pointer; transition: all 0.2s; margin-top: 2px;
-  }
-  .btn-add-item:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-  .btn-add-item.exp-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
-  .item-total { font-size: 0.76rem; color: var(--text3); margin-top: 2px; text-align: right; }
-  .item-rai-label { font-size: 0.68rem; color: var(--teal); flex-shrink: 0; }
+.day-tag{display:inline-flex;align-items:center;padding:1px 9px;border-radius:20px;font-size:.74rem;font-weight:400;background:var(--bg4);color:var(--text3)}
+.date-fmt{font-size:.74rem;color:var(--text3);margin-top:2px}
 
-  /* row header for income items */
-  .item-col-header {
-    display: flex; align-items: center; gap: 3px;
-    font-size: 0.65rem; color: var(--text3); margin-bottom: 2px;
-    padding: 0 2px;
-  }
-  .ich-name { flex: 1; }
-  .ich-rai { width: 46px; text-align: right; color: var(--teal); }
-  .ich-amt { width: 66px; text-align: right; }
-  .ich-pay { width: 52px; text-align: center; }
-  .ich-del { width: 18px; }
+.money-g{color:var(--accent);font-weight:500}
+.money-r{color:var(--red);font-weight:500}
+.profit-pos{color:var(--accent)}.profit-neg{color:var(--red)}.profit-zero{color:var(--text3)}
 
-  /* STATUS */
-  .status-checks { display: flex; flex-direction: column; gap: 4px; }
-  .check-label {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.78rem; color: var(--text2); cursor: pointer; user-select: none;
-  }
-  .check-label input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
-  .status-badge {
-    display: inline-flex; align-items: center;
-    padding: 2px 8px; border-radius: 20px;
-    font-size: 0.72rem; font-weight: 500; margin-top: 4px; white-space: nowrap;
-  }
-  .badge-wait { background: var(--bg4); color: var(--text3); }
-  .badge-partial { background: var(--yellow-dim); color: var(--yellow); }
-  .badge-done { background: var(--accent-dim); color: var(--accent); }
-  .badge-paid { background: var(--blue-dim); color: var(--blue); }
+.sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:500;white-space:nowrap}
+.sb-wait{background:var(--bg4);color:var(--text3)}
+.sb-part{background:var(--yellow-d);color:var(--yellow)}
+.sb-done{background:var(--accent-d);color:var(--accent)}
+.sb-paid{background:var(--blue-d);color:var(--blue)}
 
-  /* ACTION BUTTONS */
-  .action-btns { display: flex; gap: 4px; }
-  .btn-sm {
-    width: 30px; height: 30px; border: 1px solid var(--border);
-    background: var(--bg3); border-radius: 6px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.9rem; color: var(--text2); transition: all 0.2s;
-  }
-  .btn-sm:hover { background: var(--bg4); color: var(--text); }
-  .btn-sm.del:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
-  .btn-sm.dup:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.act-btns{display:flex;gap:5px}
+.btn-sm-ico{width:29px;height:29px;border:1px solid var(--border);background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--text2);transition:all .18s}
+.btn-sm-ico:hover{background:var(--bg4);color:var(--text)}
+.btn-sm-ico.del:hover{background:var(--red-d);color:var(--red);border-color:var(--red)}
+.btn-sm-ico.edit:hover{background:var(--accent-d);color:var(--accent);border-color:var(--accent)}
+.btn-sm-ico.dup:hover{background:var(--blue-d);color:var(--blue);border-color:var(--blue)}
 
-  /* EMPTY STATE */
-  .empty-state { padding: 64px 20px; text-align: center; color: var(--text3); }
-  .empty-state .icon { font-size: 3.5rem; margin-bottom: 16px; }
-  .empty-state h3 { font-size: 1.1rem; color: var(--text2); margin-bottom: 8px; font-weight: 500; }
-  .empty-state p { font-size: 0.88rem; }
+/* ── CARD LIST (mobile) ───────────────────────────────────────────────────── */
+.card-list{display:none;flex-direction:column;gap:10px}
+.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:box-shadow .18s}
+.day-card.today{border-left:3px solid var(--accent)}
+.dc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.dc-date{font-size:.9rem;font-weight:500}
+.dc-day{font-size:.76rem;color:var(--text3);margin-top:2px}
+.dc-nums{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.dc-num{background:var(--bg3);border-radius:8px;padding:8px 10px}
+.dc-num-label{font-size:.68rem;color:var(--text3);margin-bottom:2px}
+.dc-num-val{font-size:1rem;font-weight:600}
+.dc-works{font-size:.8rem;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.dc-works strong{color:var(--text3);font-weight:500}
+.dc-footer{display:flex;align-items:center;justify-content:space-between}
 
-  /* DAY TAG */
-  .day-tag {
-    display: inline-flex; align-items: center;
-    padding: 2px 10px; border-radius: 20px;
-    font-size: 0.78rem; font-weight: 500;
-    background: var(--bg4); color: var(--text2);
-  }
+/* ── EMPTY ───────────────────────────────────────────────────────────────── */
+.empty{padding:56px 20px;text-align:center;color:var(--text3)}
+.empty .ico{font-size:3rem;margin-bottom:12px}
+.empty h3{font-size:1rem;color:var(--text2);margin-bottom:6px;font-weight:500}
+.empty p{font-size:.84rem}
 
-  /* MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px); z-index: 200;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.2s;
-  }
-  .modal-overlay.show { opacity: 1; pointer-events: all; }
-  .modal {
-    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 28px; max-width: 420px; width: 90%; box-shadow: var(--shadow);
-    transform: scale(0.95); transition: transform 0.2s;
-  }
-  .modal-overlay.show .modal { transform: scale(1); }
-  .modal h3 { font-size: 1.05rem; margin-bottom: 10px; }
-  .modal p { font-size: 0.88rem; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
-  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+/* ── MODAL OVERLAY ────────────────────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+.overlay.show{opacity:1;pointer-events:all}
+@media(min-width:600px){.overlay{align-items:center}}
 
-  /* TOAST */
-  .toast-container {
-    position: fixed; bottom: 24px; right: 24px; z-index: 300;
-    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-  }
-  .toast {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 16px;
-    font-size: 0.85rem; color: var(--text); box-shadow: var(--shadow);
-    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .toast.success { border-left: 3px solid var(--accent); }
-  .toast.error { border-left: 3px solid var(--red); }
-  .toast.info { border-left: 3px solid var(--blue); }
-  @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+/* ── DETAIL MODAL ────────────────────────────────────────────────────────── */
+.detail-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow);transform:translateY(20px);transition:transform .22s;display:flex;flex-direction:column}
+@media(min-width:600px){.detail-modal{border-radius:var(--r);max-height:88vh;transform:scale(.97)}}
+.overlay.show .detail-modal{transform:none}
+@media(min-width:600px){.overlay.show .detail-modal{transform:scale(1)}}
 
-  /* PRINT */
-  @media print {
-    .no-print, .app-header, .toolbar, .action-cell, thead th:last-child,
-    .monthly-panel, .btn-add-item, .btn-item-del { display: none !important; }
-    .app-header-print { display: block !important; }
-    body { background: white; color: black; }
-    .table-wrap { border: 1px solid #ccc; box-shadow: none; }
-    td, th { border: 1px solid #ddd !important; }
-  }
-  .app-header-print { display: none; text-align: center; margin-bottom: 16px; }
+.dm-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg2);z-index:2}
+.dm-title{font-size:1rem;font-weight:600;flex:1}
+.dm-close{width:30px;height:30px;border:none;background:transparent;color:var(--text3);font-size:1.2rem;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s}
+.dm-close:hover{background:var(--bg3);color:var(--text)}
 
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
-    .main-wrap { padding: 12px; }
-    .dashboard { grid-template-columns: repeat(3, 1fr); }
-    .monthly-stats { grid-template-columns: repeat(2, 1fr); }
-    .search-input { width: 160px; }
-    .search-input:focus { width: 180px; }
-    .btn { padding: 8px 10px; font-size: 0.82rem; }
-    .conn-badge { font-size: 0.72rem; padding: 4px 8px; }
-  }
-  @media (max-width: 480px) {
-    .dashboard { grid-template-columns: repeat(2, 1fr); }
-    .monthly-stats { grid-template-columns: repeat(2, 1fr); }
-    .header-inner { gap: 6px; }
-    .app-logo { font-size: 1rem; }
-    .conn-text { display: none; }
-  }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
-  #importFile { display: none; }
-  .date-formatted { font-size: 0.82rem; color: var(--text2); margin-top: 2px; }
-  .section-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.dm-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:20px}
+
+.dm-section{display:flex;flex-direction:column;gap:10px}
+.dm-sec-title{font-size:.72rem;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+/* fields */
+.field-group{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.74rem;color:var(--text3);font-weight:400}
+.field input,.field textarea,.field select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-s);padding:8px 10px;color:var(--text);font-size:.85rem;transition:all .18s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
+.field textarea{resize:vertical;min-height:60px;line-height:1.5}
+
+/* item tables in modal */
+.items-table{width:100%;border-collapse:collapse}
+.items-table th{font-size:.7rem;color:var(--text3);font-weight:500;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.items-table td{padding:5px 6px;vertical-align:middle}
+.it-name{min-width:80px}
+.it-input{background:var(--bg3);border:1px solid transparent;border-radius:6px;padding:5px 8px;color:var(--text);font-size:.82rem;width:100%;transition:all .15s}
+.it-input:hover,.it-input:focus{border-color:var(--border);outline:none;background:var(--bg4)}
+.it-input.amt{width:76px;text-align:right;color:var(--accent)}
+.it-input.amt.exp{color:var(--red)}
+.it-input.rai{width:56px;text-align:right;color:var(--teal)}
+.it-sel{background:var(--bg3);border:1px solid transparent;border-radius:6px;padding:4px 6px;color:var(--text2);font-size:.76rem;cursor:pointer;transition:all .15s;width:60px}
+.it-sel:hover,.it-sel:focus{border-color:var(--border);outline:none}
+.it-del{width:24px;height:24px;border:none;background:transparent;color:var(--text3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .15s;flex-shrink:0}
+.it-del:hover{color:var(--red);background:var(--red-d)}
+.items-total{font-size:.78rem;color:var(--text2);text-align:right;padding:6px 6px 0;font-weight:500}
+
+/* status checks in modal */
+.check-list{display:flex;flex-direction:column;gap:8px}
+.chk-label{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--text2);cursor:pointer;user-select:none}
+.chk-label input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+
+/* dm footer */
+.dm-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg2)}
+
+/* ── CONFIRM MODAL ────────────────────────────────────────────────────────── */
+.confirm-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;max-width:380px;width:90%;box-shadow:var(--shadow);transform:scale(.96);transition:transform .22s}
+.overlay.show .confirm-modal{transform:scale(1)}
+.confirm-modal h3{font-size:.95rem;font-weight:600;margin-bottom:8px}
+.confirm-modal p{font-size:.84rem;color:var(--text2);margin-bottom:18px;line-height:1.6}
+.confirm-btns{display:flex;gap:8px;justify-content:flex-end}
+
+/* ── TOAST ───────────────────────────────────────────────────────────────── */
+.toast-c{position:fixed;bottom:20px;right:20px;z-index:400;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-s);padding:9px 14px;font-size:.82rem;color:var(--text);box-shadow:var(--shadow-s);display:flex;align-items:center;gap:7px;animation:toastIn .25s ease,toastOut .25s ease 2.6s forwards}
+.toast.ok{border-left:3px solid var(--accent)}.toast.err{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--blue)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0}}
+
+/* ── PRINT ───────────────────────────────────────────────────────────────── */
+@media print{
+  .no-print,.hdr,.toolbar,.act-c,.card-list{display:none!important}
+  .tbl-wrap{display:block!important}
+  body{background:#fff;color:#000}
+  td,th{border:1px solid #ddd!important}
+  .print-hdr{display:block!important}
+}
+.print-hdr{display:none;text-align:center;margin-bottom:14px}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media(max-width:600px){
+  .wrap{padding:12px}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .tbl-wrap{display:none}
+  .card-list{display:flex}
+  .toolbar{gap:6px}
+  .btn{padding:7px 10px;font-size:.8rem}
+  .srch{width:130px}
+  .srch:focus{width:160px}
+  .conn-text{display:none}
+  .stat-grid{gap:8px}
+  .sc-val{font-size:1.1rem}
+  .detail-modal{max-height:96vh}
+}
+@media(min-width:601px) and (max-width:900px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+#importFile{display:none}
 </style>
 </head>
 <body>
 
-<div class="app-header no-print">
-  <div class="header-inner">
-    <div class="app-logo"><span>🌿</span> แอปจดคิวพ่นยาผัก</div>
-    <div class="conn-badge connecting" id="connBadge">
+<!-- HEADER -->
+<header class="hdr no-print">
+  <div class="hdr-in">
+    <div class="logo">🌿 จดคิวพ่นยา</div>
+    <div class="conn connecting" id="connBadge">
       <div class="dot"></div>
       <span class="conn-text" id="connText">กำลังเชื่อมต่อ</span>
     </div>
-    <div class="header-right">
-      <button class="btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
-      <button class="btn-icon no-print" onclick="window._app.printPage()" title="พิมพ์">🖨️</button>
+    <div class="hdr-r">
+      <button class="ico-btn" id="themeToggle" title="สลับธีม">🌙</button>
+      <button class="ico-btn no-print" onclick="window._app.printPage()" title="พิมพ์">🖨️</button>
     </div>
   </div>
-</div>
+</header>
+<div class="print-hdr"><h2>🌿 แอปจดคิวพ่นยาผัก</h2><p id="printDate"></p></div>
 
-<div class="app-header-print">
-  <h2>🌿 แอปจดคิวพ่นยาผัก</h2>
-  <p id="printDate"></p>
-</div>
+<div class="wrap">
 
-<div class="main-wrap">
-
-  <!-- MONTHLY SUMMARY -->
-  <div class="monthly-panel no-print">
-    <div class="monthly-header">
-      <div class="monthly-title">📅 สรุปรายเดือน</div>
-      <div class="month-selects">
-        <select class="month-select" id="monthSel" onchange="window._app.updateMonthly()">
-          <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option>
-          <option value="3">มีนาคม</option><option value="4">เมษายน</option>
-          <option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
-          <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option>
-          <option value="9">กันยายน</option><option value="10">ตุลาคม</option>
-          <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+  <!-- STATS: เดือนที่เลือก -->
+  <div class="stats-section">
+    <div class="stats-label">
+      สรุปรายเดือน
+      <div class="month-controls">
+        <select class="month-sel" id="monthSel" onchange="window._app.updateMonthly()">
+          <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
+          <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
+          <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
+          <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
         </select>
-        <select class="month-select" id="yearSel" onchange="window._app.updateMonthly()"></select>
-        <button class="btn" style="padding:5px 10px;font-size:0.78rem" onclick="window._app.setMonthNow()">เดือนนี้</button>
-        <button class="btn" style="padding:5px 10px;font-size:0.78rem" onclick="window._app.setMonthPrev()">เดือนก่อน</button>
+        <select class="month-sel" id="yearSel" onchange="window._app.updateMonthly()"></select>
+        <button class="btn sm" onclick="window._app.setMonthNow()">เดือนนี้</button>
+        <button class="btn sm" onclick="window._app.setMonthPrev()">ก่อนหน้า</button>
       </div>
     </div>
-    <div class="monthly-stats">
-      <div class="m-stat"><div class="m-stat-label">รายรับรวม</div><div class="m-stat-value green" id="mIncome">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">รายจ่ายรวม</div><div class="m-stat-value red" id="mExpense">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">กำไรรวม</div><div class="m-stat-value yellow" id="mProfit">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">จำนวนงาน</div><div class="m-stat-value blue" id="mCount">0 รายการ</div></div>
-      <div class="m-stat"><div class="m-stat-label">รายรับเงินสด</div><div class="m-stat-value green" id="mIncCash">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">รายรับโอน</div><div class="m-stat-value teal" id="mIncTransfer">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">รายจ่ายเงินสด</div><div class="m-stat-value red" id="mExpCash">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">รายจ่ายโอน</div><div class="m-stat-value orange" id="mExpTransfer">฿0</div></div>
-      <div class="m-stat"><div class="m-stat-label">รวมไร่ (เดือนนี้)</div><div class="m-stat-value teal" id="mRai">0 ไร่</div></div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="sc-label">รายรับ</div>
+        <div class="sc-val g" id="mIncome">฿0</div>
+        <div class="sc-sub" id="mIncSub">สด ฿0 · โอน ฿0</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">รายจ่าย</div>
+        <div class="sc-val r" id="mExpense">฿0</div>
+        <div class="sc-sub" id="mExpSub">สด ฿0 · โอน ฿0</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">กำไร</div>
+        <div class="sc-val y" id="mProfit">฿0</div>
+        <div class="sc-sub" id="mCount">0 รายการ</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">รวมไร่</div>
+        <div class="sc-val t" id="mRai">0 ไร่</div>
+      </div>
     </div>
   </div>
 
-  <!-- DASHBOARD (ทั้งหมด) -->
-  <div class="dashboard">
-    <div class="stat-card"><div class="stat-label">รายรับรวม (ทั้งหมด)</div><div class="stat-value green" id="statIncome">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">รายจ่ายรวม (ทั้งหมด)</div><div class="stat-value red" id="statExpense">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">กำไรรวม (ทั้งหมด)</div><div class="stat-value yellow" id="statProfit">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">รวมไร่ทั้งหมด</div><div class="stat-value teal" id="statRai">0 ไร่</div></div>
-    <div class="stat-card"><div class="stat-label">เงินสดรับ</div><div class="stat-value green" id="statIncCash">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">เงินโอนรับ</div><div class="stat-value teal" id="statIncTransfer">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">เงินสดจ่าย</div><div class="stat-value red" id="statExpCash">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">เงินโอนจ่าย</div><div class="stat-value orange" id="statExpTransfer">฿0</div></div>
-    <div class="stat-card"><div class="stat-label">จำนวนงานทั้งหมด</div><div class="stat-value blue" id="statTotal">0</div></div>
-    <div class="stat-card"><div class="stat-label">งานที่เสร็จแล้ว</div><div class="stat-value green" id="statDone">0</div></div>
-    <div class="stat-card"><div class="stat-label">งานที่ยังไม่เสร็จ</div><div class="stat-value purple" id="statPending">0</div></div>
+  <!-- STATS: ทั้งหมด -->
+  <div class="stats-section">
+    <div class="stats-label">สรุปรวมทั้งหมด</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="sc-label">รายรับรวม</div>
+        <div class="sc-val g" id="statIncome">฿0</div>
+        <div class="sc-sub" id="statIncSub">สด ฿0 · โอน ฿0</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">รายจ่ายรวม</div>
+        <div class="sc-val r" id="statExpense">฿0</div>
+        <div class="sc-sub" id="statExpSub">สด ฿0 · โอน ฿0</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">กำไรรวม</div>
+        <div class="sc-val y" id="statProfit">฿0</div>
+        <div class="sc-sub" id="statJobSub">งาน 0 · เสร็จ 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">รวมไร่ทั้งหมด</div>
+        <div class="sc-val t" id="statRai">0 ไร่</div>
+      </div>
+    </div>
   </div>
 
   <!-- TOOLBAR -->
   <div class="toolbar no-print">
-    <button class="btn primary" onclick="window._app.addRow()">＋ เพิ่มรายการ</button>
-    <button class="btn primary" onclick="window._app.addTodayRow()">📅 เพิ่มวันนี้</button>
-    <button class="btn" onclick="window._app.sortByDate()">↕ เรียงตามวันที่</button>
-    <button class="btn" onclick="window._app.exportJSON()">📤 ส่งออก JSON</button>
-    <button class="btn" onclick="document.getElementById('importFile').click()">📥 นำเข้า JSON</button>
+    <button class="btn pri" onclick="window._app.addRow()">＋ เพิ่มรายการ</button>
+    <button class="btn pri" onclick="window._app.addTodayRow()">📅 วันนี้</button>
+    <button class="btn" onclick="window._app.sortByDate()">↕ เรียงวันที่</button>
+    <button class="btn" onclick="window._app.exportJSON()">📤 ส่งออก</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">📥 นำเข้า</button>
     <input type="file" id="importFile" accept=".json" onchange="window._app.importJSON(event)">
     <button class="btn danger" onclick="window._app.confirmClearAll()">🗑 ล้างทั้งหมด</button>
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput" placeholder="ค้นหา..." oninput="window._app.filterRows()">
+    <div class="srch-wrap">
+      <span class="srch-ico">🔍</span>
+      <input type="text" class="srch" id="searchInput" placeholder="ค้นหา..." oninput="window._app.filterRows()">
     </div>
   </div>
 
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <div class="table-scroll">
+  <!-- TABLE (desktop) -->
+  <div class="tbl-wrap no-print">
+    <div class="tbl-scroll">
       <table id="mainTable">
         <thead>
           <tr>
-            <th style="width:40px">#</th>
-            <th onclick="window._app.sortByDate()">วันที่ <span class="sort-arrow">↕</span></th>
+            <th style="width:36px">#</th>
+            <th class="sort-col" onclick="window._app.sortByDate()">วันที่ ↕</th>
             <th>วัน</th>
-            <th>งานช่วงเช้า</th>
-            <th>งานช่วงเย็น</th>
+            <th>งานเช้า</th>
+            <th>งานเย็น</th>
             <th>รายรับ</th>
             <th>รายจ่าย</th>
             <th style="text-align:right">กำไร</th>
             <th>สถานะ</th>
-            <th>หมายเหตุ</th>
             <th class="no-print">จัดการ</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
-    <div id="emptyState" class="empty-state" style="display:none">
-      <div class="icon">🌱</div>
+    <div id="emptyState" class="empty" style="display:none">
+      <div class="ico">🌱</div>
       <h3>ยังไม่มีรายการ</h3>
-      <p>กดปุ่ม "เพิ่มรายการ" หรือ "เพิ่มวันนี้" เพื่อเริ่มต้น</p>
+      <p>กดปุ่ม "เพิ่มรายการ" หรือ "วันนี้" เพื่อเริ่มต้น</p>
+    </div>
+  </div>
+
+  <!-- CARD LIST (mobile) -->
+  <div class="card-list" id="cardList"></div>
+  <div id="cardEmpty" class="empty" style="display:none">
+    <div class="ico">🌱</div><h3>ยังไม่มีรายการ</h3><p>กดปุ่ม "เพิ่มรายการ" เพื่อเริ่มต้น</p>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- DETAIL MODAL OVERLAY -->
+<div class="overlay" id="detailOverlay">
+  <div class="detail-modal" id="detailModal">
+    <div class="dm-header">
+      <div class="dm-title" id="dmTitle">รายละเอียด</div>
+      <button class="dm-close" onclick="window._app.closeDetail()">×</button>
+    </div>
+    <div class="dm-body" id="dmBody"></div>
+    <div class="dm-footer">
+      <button class="btn danger sm" id="dmDelBtn">🗑 ลบรายการนี้</button>
+      <button class="btn sm" onclick="window._app.closeDetail()">ปิด</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <h3 id="modalTitle">ยืนยันการลบ</h3>
-    <p id="modalMsg">คุณต้องการลบรายการนี้ใช่ไหม?</p>
-    <div class="modal-btns">
-      <button class="btn" onclick="window._app.closeModal()">ยกเลิก</button>
-      <button class="btn danger" id="modalConfirmBtn">ยืนยัน</button>
+<!-- CONFIRM OVERLAY -->
+<div class="overlay" id="confirmOverlay">
+  <div class="confirm-modal">
+    <h3 id="cfTitle">ยืนยัน</h3>
+    <p id="cfMsg"></p>
+    <div class="confirm-btns">
+      <button class="btn sm" onclick="window._app.closeConfirm()">ยกเลิก</button>
+      <button class="btn danger sm" id="cfOkBtn">ยืนยัน</button>
     </div>
   </div>
 </div>
 
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-c" id="toastC"></div>
 
+<!-- ═══════════════ SCRIPT ═══════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp }      from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 
-// ── Firebase config (ห้ามเปลี่ยน) ────────────────────────────────────────────
+/* ── Firebase config (ห้ามเปลี่ยน) ────────────────────────────────────── */
 const firebaseConfig = {
   apiKey:            "AIzaSyA-Ma3ZkkPliZ7xFwfwSnM0oUrbI1wnXeQ",
   authDomain:        "spray-app-7b3ed.firebaseapp.com",
@@ -655,786 +474,673 @@ const firebaseConfig = {
 };
 const DB_PATH = "spray-app/rows";
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let rows          = [];
-let sortAsc       = true;
-let searchQuery   = '';
-let pendingAction = null;
-let db            = null;
-let fbReady       = false;
+/* ── State ──────────────────────────────────────────────────────────────── */
+let rows         = [];
+let sortAsc      = true;
+let searchQuery  = '';
+let pendingCf    = null;   // pending confirm action
+let openRowId    = null;   // currently open detail modal row id
+let db = null, fbReady = false;
+let activeInput  = null, pendingSnap = null;
+let ignoreSnaps  = 0, writeTimer = null;
 
-// ── Focus / editing lock ───────────────────────────────────────────────────────
-let activeInput     = null;
-let pendingSnapshot = null;
+const DAYS   = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
-// ── Firebase write guard ───────────────────────────────────────────────────────
-let ignoreSnaps = 0;
-let writeTimer  = null;
-
-const THAI_DAYS   = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
-                     'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-
-// ── Connection badge ──────────────────────────────────────────────────────────
-function setConn(status) {
-  const badge = document.getElementById('connBadge');
-  const text  = document.getElementById('connText');
-  if (!badge || !text) return;
-  badge.className = 'conn-badge ' + status;
-  text.textContent = { connecting:'กำลังเชื่อมต่อ', online:'เชื่อมต่อแล้ว', offline:'ออฟไลน์' }[status] || status;
+/* ── Connection badge ────────────────────────────────────────────────────── */
+function setConn(s) {
+  const b=document.getElementById('connBadge'), t=document.getElementById('connText');
+  if(!b||!t) return;
+  b.className='conn '+s;
+  t.textContent={connecting:'กำลังเชื่อมต่อ',online:'เชื่อมต่อแล้ว',offline:'ออฟไลน์'}[s]||s;
 }
 
-// ── localStorage ──────────────────────────────────────────────────────────────
-function loadLocal() {
-  try { const s = localStorage.getItem('spray_rows'); return s ? JSON.parse(s) : []; }
-  catch(e) { return []; }
-}
-function saveLocal() {
-  try { localStorage.setItem('spray_rows', JSON.stringify(rows)); } catch(e) {}
-}
+/* ── localStorage ────────────────────────────────────────────────────────── */
+function loadLocal(){try{const s=localStorage.getItem('spray_rows');return s?JSON.parse(s):[]}catch{return []}}
+function saveLocal(){try{localStorage.setItem('spray_rows',JSON.stringify(rows))}catch{}}
 
-// ── Firebase write: debounced (ใช้กับ typing) ─────────────────────────────────
-function writeToFirebase() {
-  if (!fbReady || !db) return;
+/* ── Firebase writes ─────────────────────────────────────────────────────── */
+function fbWrite(){
+  if(!fbReady||!db) return;
   clearTimeout(writeTimer);
-  writeTimer = setTimeout(() => {
-    ignoreSnaps++;
-    set(ref(db, DB_PATH), rows.length ? rows : null)
-      .catch(err => {
-        ignoreSnaps = Math.max(0, ignoreSnaps - 1);
-        console.warn('FB write err:', err.message);
-        showToast('บันทึก Cloud ไม่สำเร็จ', 'error');
-      });
-  }, 800);
+  writeTimer=setTimeout(()=>{ ignoreSnaps++; set(ref(db,DB_PATH),rows.length?rows:null).catch(e=>{ignoreSnaps=Math.max(0,ignoreSnaps-1);console.warn(e);showToast('บันทึก Cloud ไม่สำเร็จ','err');}); },800);
 }
-
-// ── Firebase write: immediate ─────────────────────────────────────────────────
-function writeToFirebaseNow() {
-  if (!fbReady || !db) return;
+function fbWriteNow(){
+  if(!fbReady||!db) return;
   clearTimeout(writeTimer);
-  ignoreSnaps++;
-  set(ref(db, DB_PATH), rows.length ? rows : null)
-    .catch(err => {
-      ignoreSnaps = Math.max(0, ignoreSnaps - 1);
-      console.warn('FB write (now) err:', err.message);
-      showToast('บันทึก Cloud ไม่สำเร็จ', 'error');
-    });
+  ignoreSnaps++; set(ref(db,DB_PATH),rows.length?rows:null).catch(e=>{ignoreSnaps=Math.max(0,ignoreSnaps-1);console.warn(e);});
 }
+function save(){ saveLocal(); fbWrite(); }
+function saveNow(){ saveLocal(); fbWriteNow(); }
 
-// ── Master save ───────────────────────────────────────────────────────────────
-function saveData() { saveLocal(); writeToFirebase(); }
-function saveDataImmediate() { saveLocal(); writeToFirebaseNow(); }
-
-// ── Migrate / normalize row (รองรับข้อมูลเก่า) ────────────────────────────────
-function normalizeRow(row) {
-  if (!Array.isArray(row.incomeItems))  row.incomeItems  = [];
-  if (!Array.isArray(row.expenseItems)) row.expenseItems = [];
-  // migrate: ถ้า income เป็น string เก่า → ไม่ต้องสร้าง item อัตโนมัติ
-  // แค่ normalize แต่ละ item ที่มีอยู่
-  row.incomeItems = row.incomeItems.map(i => ({
-    name:        i.name        || '',
-    amount:      i.amount      !== undefined ? i.amount : '',
-    rai:         i.rai         !== undefined ? i.rai    : 0,
-    paymentType: i.paymentType || 'เงินสด',
-  }));
-  row.expenseItems = row.expenseItems.map(i => ({
-    name:        i.name        || '',
-    amount:      i.amount      !== undefined ? i.amount : '',
-    paymentType: i.paymentType || 'เงินสด',
-  }));
+/* ── Normalize (รองรับข้อมูลเก่า) ──────────────────────────────────────── */
+function norm(row){
+  if(!Array.isArray(row.incomeItems))  row.incomeItems=[];
+  if(!Array.isArray(row.expenseItems)) row.expenseItems=[];
+  row.incomeItems  = row.incomeItems.map(i=>({name:i.name||'',amount:i.amount??'',rai:i.rai??0,paymentType:i.paymentType||'เงินสด'}));
+  row.expenseItems = row.expenseItems.map(i=>({name:i.name||'',amount:i.amount??'',paymentType:i.paymentType||'เงินสด'}));
+  if(!row.status) row.status={morning:false,evening:false,paid:false};
   return row;
 }
 
-// ── Apply snapshot จาก Firebase ───────────────────────────────────────────────
-function applySnapshot(val) {
-  if (Array.isArray(val) && val.length) {
-    rows = val.map(normalizeRow); saveLocal();
-  } else if (val && typeof val === 'object') {
-    rows = Object.values(val).map(normalizeRow); saveLocal();
-  } else {
-    const local = loadLocal();
-    if (local.length) {
-      rows = local.map(normalizeRow);
-      writeToFirebaseNow();
-    } else {
-      rows = [];
-    }
+/* ── Apply snapshot ──────────────────────────────────────────────────────── */
+function applySnap(val){
+  if(Array.isArray(val)&&val.length){ rows=val.map(norm); saveLocal(); }
+  else if(val&&typeof val==='object'){ rows=Object.values(val).map(norm); saveLocal(); }
+  else{
+    const loc=loadLocal();
+    if(loc.length){ rows=loc.map(norm); fbWriteNow(); }
+    else rows=[];
   }
-  renderTable();
+  renderAll();
 }
 
-// ── Firebase init ─────────────────────────────────────────────────────────────
-try {
-  const app = initializeApp(firebaseConfig);
-  db = getDatabase(app);
-  fbReady = true;
+/* ── Firebase init ───────────────────────────────────────────────────────── */
+try{
+  const app=initializeApp(firebaseConfig); db=getDatabase(app); fbReady=true;
+  onValue(ref(db,'.info/connected'),s=>setConn(s.val()?'online':'offline'));
+  onValue(ref(db,DB_PATH),s=>{
+    if(ignoreSnaps>0){ignoreSnaps--;return;}
+    const val=s.val();
+    if(activeInput) pendingSnap=val; else applySnap(val);
+  },e=>{console.warn(e);setConn('offline');rows=loadLocal().map(norm);renderAll();});
+}catch(e){console.warn(e);setConn('offline');rows=loadLocal().map(norm);renderAll();}
 
-  onValue(ref(db, '.info/connected'), snap => setConn(snap.val() ? 'online' : 'offline'));
-
-  onValue(ref(db, DB_PATH), snap => {
-    if (ignoreSnaps > 0) { ignoreSnaps--; return; }
-    const val = snap.val();
-    if (activeInput) {
-      pendingSnapshot = val;
-    } else {
-      applySnapshot(val);
+/* ── Focus tracking ──────────────────────────────────────────────────────── */
+document.addEventListener('focusin',e=>{if(e.target.matches('input,textarea,select'))activeInput=e.target;},true);
+document.addEventListener('focusout',e=>{
+  setTimeout(()=>{
+    if(document.activeElement&&document.activeElement.matches('input,textarea,select')){
+      activeInput=document.activeElement;
+    }else{
+      activeInput=null;
+      if(pendingSnap!==null){const v=pendingSnap;pendingSnap=null;applySnap(v);}
     }
-  }, err => {
-    console.warn('FB listener err:', err.message);
-    setConn('offline');
-    rows = loadLocal().map(normalizeRow);
-    renderTable();
-  });
+  },0);
+},true);
 
-} catch (e) {
-  console.warn('FB init failed:', e.message);
-  setConn('offline');
-  rows = loadLocal().map(normalizeRow);
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function pad(n){return String(n).padStart(2,'0')}
+function dayName(ds){if(!ds)return'';return DAYS[new Date(ds+'T00:00:00').getDay()]}
+function thaiDate(ds){
+  if(!ds)return'';const d=new Date(ds+'T00:00:00');
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+function fmt(n){if(!isFinite(n))return'฿0';return'฿'+n.toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function fmtRai(n){if(!n||!isFinite(n))return'0';return parseFloat(n.toFixed(2)).toString()}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function safeCalc(x){
+  if(!x&&x!==0)return 0;const s=String(x).trim();if(!s)return 0;
+  if(!/^[\d\s+\-*/().]+$/.test(s))return 0;
+  try{return evalE(s.replace(/\s+/g,''))}catch{return 0}
+}
+function evalE(s){
+  let p=0;const pk=()=>s[p],eat=()=>s[p++];
+  function nm(){let n='';if(pk()==='-')n+=eat();while(p<s.length&&/[\d.]/.test(pk()))n+=eat();return parseFloat(n)||0}
+  function fc(){if(pk()==='('){eat();const v=ex();if(pk()===')') eat();return v}return nm()}
+  function tm(){let v=fc();while(p<s.length&&(pk()==='*'||pk()==='/')) {const o=eat(),r=fc();v=o==='*'?v*r:(r?v/r:0)}return v}
+  function ex(){let v=tm();while(p<s.length&&(pk()==='+'||pk()==='-')){v=eat()==='+' ? v+tm():v-tm()}return v}
+  const r=ex();return isFinite(r)?r:0;
+}
+
+/* ── Computed per-row ────────────────────────────────────────────────────── */
+function rowInc(r){if(Array.isArray(r.incomeItems)&&r.incomeItems.length) return r.incomeItems.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);return safeCalc(r.income)}
+function rowExp(r){if(Array.isArray(r.expenseItems)&&r.expenseItems.length) return r.expenseItems.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);return safeCalc(r.expense)}
+function rowRai(r){if(!Array.isArray(r.incomeItems))return 0;return r.incomeItems.reduce((s,i)=>s+(parseFloat(i.rai)||0),0)}
+function rowIncCash(r){if(!Array.isArray(r.incomeItems))return 0;return r.incomeItems.filter(i=>(i.paymentType||'เงินสด')==='เงินสด').reduce((s,i)=>s+(parseFloat(i.amount)||0),0)}
+function rowIncTransfer(r){if(!Array.isArray(r.incomeItems))return 0;return r.incomeItems.filter(i=>(i.paymentType||'เงินสด')==='โอน').reduce((s,i)=>s+(parseFloat(i.amount)||0),0)}
+function rowExpCash(r){if(!Array.isArray(r.expenseItems))return 0;return r.expenseItems.filter(i=>(i.paymentType||'เงินสด')==='เงินสด').reduce((s,i)=>s+(parseFloat(i.amount)||0),0)}
+function rowExpTransfer(r){if(!Array.isArray(r.expenseItems))return 0;return r.expenseItems.filter(i=>(i.paymentType||'เงินสด')==='โอน').reduce((s,i)=>s+(parseFloat(i.amount)||0),0)}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+function badge(st){
+  const s=st||{};
+  if(s.paid) return '<span class="sbadge sb-paid">เก็บเงินแล้ว</span>';
+  if(s.morning&&s.evening) return '<span class="sbadge sb-done">เสร็จครบ</span>';
+  if(s.morning||s.evening) return '<span class="sbadge sb-part">เสร็จบางส่วน</span>';
+  return '<span class="sbadge sb-wait">รอดำเนินการ</span>';
+}
+
+/* ── Render ALL (table + cards + stats) ──────────────────────────────────── */
+function renderAll(){
   renderTable();
+  renderCards();
+  updateStats();
+  updateMonthly();
 }
 
-// ── Focus tracking ─────────────────────────────────────────────────────────────
-document.addEventListener('focusin', e => {
-  const el = e.target;
-  if (el.matches('input,textarea,select')) activeInput = el;
-}, true);
-
-document.addEventListener('focusout', e => {
-  setTimeout(() => {
-    if (document.activeElement && document.activeElement.matches('input,textarea,select')) {
-      activeInput = document.activeElement;
-    } else {
-      activeInput = null;
-      if (pendingSnapshot !== null) {
-        const snap = pendingSnapshot;
-        pendingSnapshot = null;
-        applySnapshot(snap);
-      }
-    }
-  }, 0);
-}, true);
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-function todayStr() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-function getDayName(ds)     { if (!ds) return ''; return THAI_DAYS[new Date(ds+'T00:00:00').getDay()]; }
-function formatThaiDate(ds) {
-  if (!ds) return '';
-  const d = new Date(ds+'T00:00:00');
-  return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear()+543}`;
-}
-function formatMoney(n) {
-  if (!isFinite(n)) return '฿0';
-  return '฿' + n.toLocaleString('th-TH', { minimumFractionDigits:0, maximumFractionDigits:2 });
-}
-function formatRai(n) {
-  if (!n || !isFinite(n)) return '0';
-  return parseFloat(n.toFixed(2)).toString();
-}
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Safe math (รองรับข้อมูลเก่า) ─────────────────────────────────────────────
-function safeCalc(expr) {
-  if (!expr && expr !== 0) return 0;
-  const s = String(expr).trim();
-  if (!s) return 0;
-  if (!/^[\d\s+\-*/().]+$/.test(s)) return 0;
-  try { return evalExpr(s.replace(/\s+/g,'')); } catch(e) { return 0; }
-}
-function evalExpr(s) {
-  let p = 0;
-  const peek = () => s[p], eat = () => s[p++];
-  function num() { let n=''; if(peek()==='-') n+=eat(); while(p<s.length&&/[\d.]/.test(peek())) n+=eat(); return parseFloat(n)||0; }
-  function factor() { if(peek()==='('){eat();const v=ex();if(peek()===')') eat();return v;} return num(); }
-  function term() { let v=factor(); while(p<s.length&&(peek()==='*'||peek()==='/')) { const op=eat(),r=factor(); v=op==='*'?v*r:(r?v/r:0); } return v; }
-  function ex() { let v=term(); while(p<s.length&&(peek()==='+'||peek()==='-')) { v=eat()==='+' ? v+term() : v-term(); } return v; }
-  const r=ex(); return isFinite(r)?r:0;
-}
-
-// ── Row income / expense / rai totals ──────────────────────────────────────────
-function getRowIncome(row) {
-  if (Array.isArray(row.incomeItems) && row.incomeItems.length > 0)
-    return row.incomeItems.reduce((s,i) => s+(parseFloat(i.amount)||0), 0);
-  return safeCalc(row.income);
-}
-function getRowExpense(row) {
-  if (Array.isArray(row.expenseItems) && row.expenseItems.length > 0)
-    return row.expenseItems.reduce((s,i) => s+(parseFloat(i.amount)||0), 0);
-  return safeCalc(row.expense);
-}
-function getRowRai(row) {
-  if (!Array.isArray(row.incomeItems)) return 0;
-  return row.incomeItems.reduce((s,i) => s+(parseFloat(i.rai)||0), 0);
-}
-function getRowIncCash(row) {
-  if (!Array.isArray(row.incomeItems)) return 0;
-  return row.incomeItems.filter(i=>(i.paymentType||'เงินสด')==='เงินสด').reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-}
-function getRowIncTransfer(row) {
-  if (!Array.isArray(row.incomeItems)) return 0;
-  return row.incomeItems.filter(i=>(i.paymentType||'เงินสด')==='โอน').reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-}
-function getRowExpCash(row) {
-  if (!Array.isArray(row.expenseItems)) return 0;
-  return row.expenseItems.filter(i=>(i.paymentType||'เงินสด')==='เงินสด').reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-}
-function getRowExpTransfer(row) {
-  if (!Array.isArray(row.expenseItems)) return 0;
-  return row.expenseItems.filter(i=>(i.paymentType||'เงินสด')==='โอน').reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-}
-
-// ── Status badge ──────────────────────────────────────────────────────────────
-function getStatusBadge(status) {
-  const s = status||{};
-  if (s.paid)                 return '<span class="status-badge badge-paid">เก็บเงินแล้ว</span>';
-  if (s.morning && s.evening) return '<span class="status-badge badge-done">เสร็จครบแล้ว</span>';
-  if (s.morning || s.evening) return '<span class="status-badge badge-partial">เสร็จบางส่วน</span>';
-  return '<span class="status-badge badge-wait">รอดำเนินการ</span>';
-}
-
-// ── Render income item list (name + rai + amount + paymentType) ────────────────
-function renderIncomeItemList(rowId, items) {
-  const arr = Array.isArray(items) ? items : [];
-  const totalAmt = arr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-  const totalRai = arr.reduce((s,i)=>s+(parseFloat(i.rai)||0),0);
-
-  const colHeader = arr.length > 0 ? `
-    <div class="item-col-header">
-      <span class="ich-name">ชื่อ</span>
-      <span class="ich-rai">ไร่</span>
-      <span class="ich-amt">บาท</span>
-      <span class="ich-pay">ประเภท</span>
-      <span class="ich-del"></span>
-    </div>` : '';
-
-  const itemsHtml = arr.map((item, idx) => `
-    <div class="item-row">
-      <input class="item-name-input" type="text"
-        value="${escHtml(item.name||'')}" placeholder="ชื่อผู้จ้าง/งาน..."
-        oninput="window._app.upItemField('${rowId}','income',${idx},'name',this.value)"
-        onchange="window._app.upItemField('${rowId}','income',${idx},'name',this.value)">
-      <input class="item-rai-input" type="number" min="0" step="0.25"
-        value="${escHtml(String(item.rai !== undefined ? item.rai : ''))}" placeholder="ไร่"
-        title="จำนวนไร่"
-        oninput="window._app.upItemField('${rowId}','income',${idx},'rai',this.value)"
-        onchange="window._app.upItemField('${rowId}','income',${idx},'rai',this.value)">
-      <input class="item-amount-input" type="number" min="0" step="any"
-        value="${escHtml(String(item.amount||''))}" placeholder="0"
-        oninput="window._app.upItemField('${rowId}','income',${idx},'amount',this.value)"
-        onchange="window._app.upItemField('${rowId}','income',${idx},'amount',this.value)">
-      <select class="item-pay-select"
-        onchange="window._app.upItemField('${rowId}','income',${idx},'paymentType',this.value)">
-        <option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵สด</option>
-        <option value="โอน"    ${(item.paymentType||'เงินสด')==='โอน'   ?'selected':''}>📲โอน</option>
-      </select>
-      <button class="btn-item-del"
-        onclick="window._app.delItem('${rowId}','income',${idx})" title="ลบ">×</button>
-    </div>`).join('');
-
-  const summary = arr.length > 0 ? `
-    <div class="item-total">
-      รวม: ${formatMoney(totalAmt)}
-      ${totalRai > 0 ? ` · ${formatRai(totalRai)} ไร่` : ''}
-    </div>` : '';
-
-  return `<div class="item-list" id="items-income-${rowId}">
-    ${colHeader}
-    ${itemsHtml}
-    <button class="btn-add-item"
-      onclick="window._app.addItem('${rowId}','income')">＋ เพิ่มรายรับ</button>
-    ${summary}
-  </div>`;
-}
-
-// ── Render expense item list (name + amount + paymentType) ────────────────────
-function renderExpenseItemList(rowId, items) {
-  const arr = Array.isArray(items) ? items : [];
-  const totalAmt = arr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
-
-  const colHeader = arr.length > 0 ? `
-    <div class="item-col-header">
-      <span class="ich-name">ชื่อ</span>
-      <span class="ich-amt">บาท</span>
-      <span class="ich-pay">ประเภท</span>
-      <span class="ich-del"></span>
-    </div>` : '';
-
-  const itemsHtml = arr.map((item, idx) => `
-    <div class="item-row">
-      <input class="item-name-input" type="text"
-        value="${escHtml(item.name||'')}" placeholder="รายการจ่าย..."
-        oninput="window._app.upItemField('${rowId}','expense',${idx},'name',this.value)"
-        onchange="window._app.upItemField('${rowId}','expense',${idx},'name',this.value)">
-      <input class="item-amount-input exp" type="number" min="0" step="any"
-        value="${escHtml(String(item.amount||''))}" placeholder="0"
-        oninput="window._app.upItemField('${rowId}','expense',${idx},'amount',this.value)"
-        onchange="window._app.upItemField('${rowId}','expense',${idx},'amount',this.value)">
-      <select class="item-pay-select"
-        onchange="window._app.upItemField('${rowId}','expense',${idx},'paymentType',this.value)">
-        <option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵สด</option>
-        <option value="โอน"    ${(item.paymentType||'เงินสด')==='โอน'   ?'selected':''}>📲โอน</option>
-      </select>
-      <button class="btn-item-del"
-        onclick="window._app.delItem('${rowId}','expense',${idx})" title="ลบ">×</button>
-    </div>`).join('');
-
-  const summary = arr.length > 0 ? `
-    <div class="item-total">รวม: ${formatMoney(totalAmt)}</div>` : '';
-
-  return `<div class="item-list" id="items-expense-${rowId}">
-    ${colHeader}
-    ${itemsHtml}
-    <button class="btn-add-item exp-btn"
-      onclick="window._app.addItem('${rowId}','expense')">＋ เพิ่มรายจ่าย</button>
-    ${summary}
-  </div>`;
-}
-
-// ── Full table render ─────────────────────────────────────────────────────────
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  const empty = document.getElementById('emptyState');
-  if (!tbody) return;
-
-  const q = searchQuery.toLowerCase();
-  const filtered = rows.filter(r => {
-    if (!q) return true;
-    const incTxt = Array.isArray(r.incomeItems)  ? r.incomeItems.map(i=>i.name).join(' ')  : (r.income||'');
-    const expTxt = Array.isArray(r.expenseItems) ? r.expenseItems.map(i=>i.name).join(' ') : (r.expense||'');
-    return (r.date||'').includes(q)
-        || (r.morning||'').toLowerCase().includes(q)
-        || (r.evening||'').toLowerCase().includes(q)
-        || (r.note||'').toLowerCase().includes(q)
-        || getDayName(r.date).includes(q)
-        || incTxt.toLowerCase().includes(q)
-        || expTxt.toLowerCase().includes(q);
+/* ── Filter rows ─────────────────────────────────────────────────────────── */
+function filtered(){
+  const q=searchQuery.toLowerCase();
+  return rows.filter(r=>{
+    if(!q) return true;
+    const it=Array.isArray(r.incomeItems)?r.incomeItems.map(i=>i.name).join(' '):(r.income||'');
+    const et=Array.isArray(r.expenseItems)?r.expenseItems.map(i=>i.name).join(' '):(r.expense||'');
+    return (r.date||'').includes(q)||(r.morning||'').toLowerCase().includes(q)||(r.evening||'').toLowerCase().includes(q)||(r.note||'').toLowerCase().includes(q)||dayName(r.date).includes(q)||it.toLowerCase().includes(q)||et.toLowerCase().includes(q);
   });
+}
 
-  empty.style.display = filtered.length ? 'none' : '';
-  const today = todayStr();
-
-  tbody.innerHTML = filtered.map((row, i) => {
-    const income  = getRowIncome(row);
-    const expense = getRowExpense(row);
-    const profit  = income - expense;
-    const pClass  = profit>0?'pos':profit<0?'neg':'zero';
-    const st      = row.status||{};
-    const incItems = Array.isArray(row.incomeItems)  ? row.incomeItems  : [];
-    const expItems = Array.isArray(row.expenseItems) ? row.expenseItems : [];
-
-    return `<tr class="${row.date===today?'today-row':''}" data-id="${row.id}">
+/* ── TABLE render ────────────────────────────────────────────────────────── */
+function renderTable(){
+  const tbody=document.getElementById('tableBody');
+  const empty=document.getElementById('emptyState');
+  if(!tbody) return;
+  const f=filtered();
+  empty.style.display=f.length?'none':'';
+  const today=todayStr();
+  tbody.innerHTML=f.map((row,i)=>{
+    const inc=rowInc(row),exp=rowExp(row),pft=inc-exp;
+    const pc=pft>0?'pos':pft<0?'neg':'zero';
+    return `<tr class="${row.date===today?'today':''}" data-id="${row.id}">
       <td class="num">${i+1}</td>
-      <td class="date-cell">
-        <input class="cell-date" type="date" value="${escHtml(row.date||'')}"
-          onchange="window._app.upField('${row.id}','date',this.value)">
-        <div class="date-formatted">${formatThaiDate(row.date)}</div>
+      <td class="date-c">
+        <input class="cell-date" type="date" value="${esc(row.date||'')}" onchange="window._app.upField('${row.id}','date',this.value)">
+        <div class="date-fmt">${thaiDate(row.date)}</div>
       </td>
-      <td class="day-cell"><span class="day-tag">${getDayName(row.date)}</span></td>
-      <td class="work-cell">
-        <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเช้า..."
-          oninput="window._app.upFieldSilent('${row.id}','morning',this.value)"
-          onchange="window._app.upField('${row.id}','morning',this.value)">${escHtml(row.morning||'')}</textarea>
+      <td class="day-c"><span class="day-tag">${dayName(row.date)}</span></td>
+      <td class="work-c">
+        <textarea class="cell-ta" rows="2" placeholder="งานช่วงเช้า..."
+          oninput="window._app.upSilent('${row.id}','morning',this.value)"
+          onchange="window._app.upField('${row.id}','morning',this.value)">${esc(row.morning||'')}</textarea>
       </td>
-      <td class="work-cell">
-        <textarea class="cell-textarea" rows="2" placeholder="งานช่วงเย็น..."
-          oninput="window._app.upFieldSilent('${row.id}','evening',this.value)"
-          onchange="window._app.upField('${row.id}','evening',this.value)">${escHtml(row.evening||'')}</textarea>
+      <td class="work-c">
+        <textarea class="cell-ta" rows="2" placeholder="งานช่วงเย็น..."
+          oninput="window._app.upSilent('${row.id}','evening',this.value)"
+          onchange="window._app.upField('${row.id}','evening',this.value)">${esc(row.evening||'')}</textarea>
       </td>
-      <td class="money-cell">
-        ${renderIncomeItemList(row.id, incItems)}
-        <div class="money-display" id="inc-total-${row.id}">${formatMoney(income)}</div>
-      </td>
-      <td class="money-cell">
-        ${renderExpenseItemList(row.id, expItems)}
-        <div class="money-display expense" id="exp-total-${row.id}">${formatMoney(expense)}</div>
-      </td>
-      <td class="profit-cell">
-        <div class="profit-display ${pClass}" id="profit-${row.id}">${formatMoney(profit)}</div>
-      </td>
-      <td class="status-cell">
-        <div class="status-checks">
-          <label class="check-label">
-            <input type="checkbox" ${st.morning?'checked':''}
-              onchange="window._app.upStatus('${row.id}','morning',this.checked)">เช้าเสร็จแล้ว</label>
-          <label class="check-label">
-            <input type="checkbox" ${st.evening?'checked':''}
-              onchange="window._app.upStatus('${row.id}','evening',this.checked)">เย็นเสร็จแล้ว</label>
-          <label class="check-label">
-            <input type="checkbox" ${st.paid?'checked':''}
-              onchange="window._app.upStatus('${row.id}','paid',this.checked)">เก็บเงินแล้ว</label>
-        </div>
-        ${getStatusBadge(st)}
-      </td>
-      <td class="note-cell">
-        <textarea class="cell-textarea" rows="2" placeholder="หมายเหตุ..."
-          oninput="window._app.upFieldSilent('${row.id}','note',this.value)"
-          onchange="window._app.upField('${row.id}','note',this.value)">${escHtml(row.note||'')}</textarea>
-      </td>
-      <td class="action-cell no-print">
-        <div class="action-btns">
-          <button class="btn-sm dup" onclick="window._app.duplicateRow('${row.id}')" title="คัดลอก">📋</button>
-          <button class="btn-sm del" onclick="window._app.confirmDelete('${row.id}')" title="ลบ">🗑</button>
+      <td class="money-c money-g">${fmt(inc)}</td>
+      <td class="money-c money-r">${fmt(exp)}</td>
+      <td class="profit-c profit-${pc}">${fmt(pft)}</td>
+      <td class="status-c">${badge(row.status)}</td>
+      <td class="act-c no-print">
+        <div class="act-btns">
+          <button class="btn-sm-ico edit" onclick="window._app.openDetail('${row.id}')" title="รายละเอียด/แก้ไข">✏️</button>
+          <button class="btn-sm-ico dup"  onclick="window._app.dupRow('${row.id}')" title="คัดลอก">📋</button>
+          <button class="btn-sm-ico del"  onclick="window._app.askDelete('${row.id}')" title="ลบ">🗑</button>
         </div>
       </td>
     </tr>`;
   }).join('');
-
-  updateDashboard();
-  updateMonthly();
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
-function updateDashboard() {
-  let inc=0, exp=0, rai=0, done=0;
-  let incCash=0, incTransfer=0, expCash=0, expTransfer=0;
-  rows.forEach(r => {
-    inc         += getRowIncome(r);
-    exp         += getRowExpense(r);
-    rai         += getRowRai(r);
-    incCash     += getRowIncCash(r);
-    incTransfer += getRowIncTransfer(r);
-    expCash     += getRowExpCash(r);
-    expTransfer += getRowExpTransfer(r);
-    const s = r.status||{}; if (s.morning && s.evening) done++;
+/* ── CARD render (mobile) ────────────────────────────────────────────────── */
+function renderCards(){
+  const list=document.getElementById('cardList');
+  const empty=document.getElementById('cardEmpty');
+  if(!list) return;
+  const f=filtered();
+  empty.style.display=f.length?'none':'';
+  const today=todayStr();
+  list.innerHTML=f.map(row=>{
+    const inc=rowInc(row),exp=rowExp(row),pft=inc-exp,rai=rowRai(row);
+    const pc=pft>0?'g':pft<0?'r':'';
+    const mor=row.morning?`<strong>เช้า</strong> ${row.morning.slice(0,30)}${row.morning.length>30?'…':''}`:''
+    const eve=row.evening?`<strong class="dc-day" style="color:var(--text3)">เย็น</strong> ${row.evening.slice(0,30)}${row.evening.length>30?'…':''}`:''
+    return `<div class="day-card ${row.date===today?'today':''}" data-id="${row.id}">
+      <div class="dc-top">
+        <div>
+          <div class="dc-date">${thaiDate(row.date)||'ไม่มีวันที่'}</div>
+          <div class="dc-day">${dayName(row.date)}</div>
+        </div>
+        ${badge(row.status)}
+      </div>
+      ${(mor||eve)?`<div class="dc-works">${[mor,eve].filter(Boolean).join(' · ')}</div>`:''}
+      <div class="dc-nums">
+        <div class="dc-num"><div class="dc-num-label">รายรับ</div><div class="dc-num-val money-g">${fmt(inc)}</div></div>
+        <div class="dc-num"><div class="dc-num-label">รายจ่าย</div><div class="dc-num-val money-r">${fmt(exp)}</div></div>
+        <div class="dc-num"><div class="dc-num-label">กำไร</div><div class="dc-num-val sc-val ${pc}">${fmt(pft)}</div></div>
+        <div class="dc-num"><div class="dc-num-label">รวมไร่</div><div class="dc-num-val" style="color:var(--teal)">${fmtRai(rai)} ไร่</div></div>
+      </div>
+      <div class="dc-footer">
+        <button class="btn sm pri" onclick="window._app.openDetail('${row.id}')">✏️ แก้ไขรายละเอียด</button>
+        <button class="btn sm danger" onclick="window._app.askDelete('${row.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── STATS update ────────────────────────────────────────────────────────── */
+function updateStats(){
+  let inc=0,exp=0,rai=0,done=0;
+  let ic=0,it=0,ec=0,et=0;
+  rows.forEach(r=>{
+    inc+=rowInc(r);exp+=rowExp(r);rai+=rowRai(r);
+    ic+=rowIncCash(r);it+=rowIncTransfer(r);ec+=rowExpCash(r);et+=rowExpTransfer(r);
+    const s=r.status||{};if(s.morning&&s.evening)done++;
   });
-  const pft = inc - exp;
-  const el = id => document.getElementById(id);
-  if (el('statIncome'))      el('statIncome').textContent      = formatMoney(inc);
-  if (el('statExpense'))     el('statExpense').textContent     = formatMoney(exp);
-  if (el('statProfit'))      { el('statProfit').textContent = formatMoney(pft); el('statProfit').className = 'stat-value '+(pft>=0?'yellow':'red'); }
-  if (el('statRai'))         el('statRai').textContent         = formatRai(rai) + ' ไร่';
-  if (el('statIncCash'))     el('statIncCash').textContent     = formatMoney(incCash);
-  if (el('statIncTransfer')) el('statIncTransfer').textContent = formatMoney(incTransfer);
-  if (el('statExpCash'))     el('statExpCash').textContent     = formatMoney(expCash);
-  if (el('statExpTransfer')) el('statExpTransfer').textContent = formatMoney(expTransfer);
-  if (el('statTotal'))       el('statTotal').textContent       = rows.length;
-  if (el('statDone'))        el('statDone').textContent        = done;
-  if (el('statPending'))     el('statPending').textContent     = rows.length - done;
+  const pft=inc-exp;
+  const el=id=>document.getElementById(id);
+  if(el('statIncome'))  el('statIncome').textContent=fmt(inc);
+  if(el('statIncSub'))  el('statIncSub').textContent=`สด ${fmt(ic)} · โอน ${fmt(it)}`;
+  if(el('statExpense')) el('statExpense').textContent=fmt(exp);
+  if(el('statExpSub'))  el('statExpSub').textContent=`สด ${fmt(ec)} · โอน ${fmt(et)}`;
+  if(el('statProfit'))  {el('statProfit').textContent=fmt(pft);el('statProfit').className='sc-val '+(pft>=0?'y':'r');}
+  if(el('statJobSub'))  el('statJobSub').textContent=`งาน ${rows.length} · เสร็จ ${done}`;
+  if(el('statRai'))     el('statRai').textContent=fmtRai(rai)+' ไร่';
 }
 
-// ── Monthly summary ───────────────────────────────────────────────────────────
-function initMonthlySelects() {
-  const now = new Date();
-  const yearSel = document.getElementById('yearSel');
-  if (!yearSel) return;
-  for (let y = now.getFullYear()-3; y <= now.getFullYear()+1; y++) {
-    const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y + 543;
-    yearSel.appendChild(opt);
+/* ── MONTHLY update ──────────────────────────────────────────────────────── */
+function initMonthSel(){
+  const now=new Date();
+  const ys=document.getElementById('yearSel'); if(!ys) return;
+  for(let y=now.getFullYear()-3;y<=now.getFullYear()+1;y++){
+    const o=document.createElement('option'); o.value=y; o.textContent=y+543; ys.appendChild(o);
   }
-  yearSel.value = now.getFullYear();
-  document.getElementById('monthSel').value = now.getMonth() + 1;
+  ys.value=now.getFullYear();
+  document.getElementById('monthSel').value=now.getMonth()+1;
+}
+function updateMonthly(){
+  const ms=document.getElementById('monthSel'), ys=document.getElementById('yearSel');
+  if(!ms||!ys) return;
+  const sm=parseInt(ms.value),sy=parseInt(ys.value);
+  const f=rows.filter(r=>{if(!r.date)return false;const d=new Date(r.date+'T00:00:00');return d.getMonth()+1===sm&&d.getFullYear()===sy;});
+  let inc=0,exp=0,rai=0,ic=0,it=0,ec=0,et=0;
+  f.forEach(r=>{inc+=rowInc(r);exp+=rowExp(r);rai+=rowRai(r);ic+=rowIncCash(r);it+=rowIncTransfer(r);ec+=rowExpCash(r);et+=rowExpTransfer(r);});
+  const pft=inc-exp;
+  const el=id=>document.getElementById(id);
+  if(el('mIncome'))   el('mIncome').textContent=fmt(inc);
+  if(el('mIncSub'))   el('mIncSub').textContent=`สด ${fmt(ic)} · โอน ${fmt(it)}`;
+  if(el('mExpense'))  el('mExpense').textContent=fmt(exp);
+  if(el('mExpSub'))   el('mExpSub').textContent=`สด ${fmt(ec)} · โอน ${fmt(et)}`;
+  if(el('mProfit'))   {el('mProfit').textContent=fmt(pft);el('mProfit').className='sc-val '+(pft>=0?'y':'r');}
+  if(el('mCount'))    el('mCount').textContent=f.length+' รายการ';
+  if(el('mRai'))      el('mRai').textContent=fmtRai(rai)+' ไร่';
+}
+function setMonthNow(){const n=new Date();document.getElementById('monthSel').value=n.getMonth()+1;document.getElementById('yearSel').value=n.getFullYear();updateMonthly();}
+function setMonthPrev(){const n=new Date();let m=n.getMonth(),y=n.getFullYear();if(m===0){m=12;y--;}document.getElementById('monthSel').value=m;document.getElementById('yearSel').value=y;updateMonthly();}
+
+/* ── Row CRUD ────────────────────────────────────────────────────────────── */
+function addRow(){
+  rows.push({id:genId(),date:'',morning:'',evening:'',income:'',expense:'',incomeItems:[],expenseItems:[],status:{morning:false,evening:false,paid:false},note:''});
+  save(); renderAll(); showToast('เพิ่มรายการแล้ว','ok');
+}
+function addTodayRow(){
+  rows.push({id:genId(),date:todayStr(),morning:'',evening:'',income:'',expense:'',incomeItems:[],expenseItems:[],status:{morning:false,evening:false,paid:false},note:''});
+  save(); renderAll(); showToast('เพิ่มรายการวันนี้แล้ว','ok');
+}
+function dupRow(id){
+  const r=rows.find(x=>x.id===id); if(!r) return;
+  const n=JSON.parse(JSON.stringify(r)); n.id=genId();
+  rows.splice(rows.indexOf(r)+1,0,n);
+  save(); renderAll(); showToast('คัดลอกแล้ว','ok');
 }
 
-function updateMonthly() {
-  const mSel = document.getElementById('monthSel');
-  const ySel = document.getElementById('yearSel');
-  if (!mSel || !ySel) return;
-  const selM = parseInt(mSel.value), selY = parseInt(ySel.value);
-  const filt = rows.filter(r => {
-    if (!r.date) return false;
-    const d = new Date(r.date+'T00:00:00');
-    return d.getMonth()+1 === selM && d.getFullYear() === selY;
-  });
-  let inc=0, exp=0, rai=0;
-  let incCash=0, incTransfer=0, expCash=0, expTransfer=0;
-  filt.forEach(r => {
-    inc         += getRowIncome(r);
-    exp         += getRowExpense(r);
-    rai         += getRowRai(r);
-    incCash     += getRowIncCash(r);
-    incTransfer += getRowIncTransfer(r);
-    expCash     += getRowExpCash(r);
-    expTransfer += getRowExpTransfer(r);
-  });
-  const pft = inc-exp;
-  const el = id => document.getElementById(id);
-  if (el('mIncome'))      el('mIncome').textContent      = formatMoney(inc);
-  if (el('mExpense'))     el('mExpense').textContent     = formatMoney(exp);
-  if (el('mProfit'))      { el('mProfit').textContent = formatMoney(pft); el('mProfit').className = 'm-stat-value '+(pft>=0?'yellow':'red'); }
-  if (el('mCount'))       el('mCount').textContent       = filt.length + ' รายการ';
-  if (el('mIncCash'))     el('mIncCash').textContent     = formatMoney(incCash);
-  if (el('mIncTransfer')) el('mIncTransfer').textContent = formatMoney(incTransfer);
-  if (el('mExpCash'))     el('mExpCash').textContent     = formatMoney(expCash);
-  if (el('mExpTransfer')) el('mExpTransfer').textContent = formatMoney(expTransfer);
-  if (el('mRai'))         el('mRai').textContent         = formatRai(rai) + ' ไร่';
+/* ── Field updates ───────────────────────────────────────────────────────── */
+function upSilent(id,field,val){
+  const r=rows.find(x=>x.id===id); if(!r) return;
+  r[field]=val; saveLocal(); fbWrite();
 }
-
-function setMonthNow() {
-  const now = new Date();
-  document.getElementById('monthSel').value = now.getMonth()+1;
-  document.getElementById('yearSel').value  = now.getFullYear();
-  updateMonthly();
-}
-function setMonthPrev() {
-  const now = new Date();
-  let m = now.getMonth(), y = now.getFullYear();
-  if (m === 0) { m = 12; y--; }
-  document.getElementById('monthSel').value = m;
-  document.getElementById('yearSel').value  = y;
-  updateMonthly();
-}
-
-// ── Actions ───────────────────────────────────────────────────────────────────
-function addRow() {
-  rows.push({ id:genId(), date:'', morning:'', evening:'',
-    income:'', expense:'', incomeItems:[], expenseItems:[],
-    status:{morning:false,evening:false,paid:false}, note:'' });
-  saveData(); renderTable(); showToast('เพิ่มรายการแล้ว','success');
-}
-function addTodayRow() {
-  rows.push({ id:genId(), date:todayStr(), morning:'', evening:'',
-    income:'', expense:'', incomeItems:[], expenseItems:[],
-    status:{morning:false,evening:false,paid:false}, note:'' });
-  saveData(); renderTable(); showToast('เพิ่มรายการวันนี้แล้ว','success');
-}
-
-// upFieldSilent: oninput → localStorage + Firebase debounce เท่านั้น ไม่ redraw ไม่หลุด focus
-function upFieldSilent(id, field, value) {
-  const row = rows.find(r=>r.id===id);
-  if (!row) return;
-  row[field] = value;
-  saveLocal();
-  writeToFirebase();
-}
-
-// upField: onchange → localStorage + Firebase + patch DOM เล็กน้อย
-function upField(id, field, value) {
-  const row = rows.find(r=>r.id===id);
-  if (!row) return;
-  row[field] = value;
-  saveData();
-  const tr = document.querySelector(`tr[data-id="${id}"]`);
-  if (!tr) return;
-  if (field === 'date') {
-    const dt = tr.querySelector('.day-tag');       if(dt) dt.textContent = getDayName(value);
-    const df = tr.querySelector('.date-formatted');if(df) df.textContent = formatThaiDate(value);
-    tr.classList.toggle('today-row', value === todayStr());
+function upField(id,field,val){
+  const r=rows.find(x=>x.id===id); if(!r) return;
+  r[field]=val; save();
+  // patch DOM without full redraw
+  const tr=document.querySelector(`tr[data-id="${id}"]`);
+  if(tr&&field==='date'){
+    const dt=tr.querySelector('.day-tag'); if(dt) dt.textContent=dayName(val);
+    const df=tr.querySelector('.date-fmt'); if(df) df.textContent=thaiDate(val);
+    tr.classList.toggle('today',val===todayStr());
     updateMonthly();
   }
 }
 
-function upStatus(id, field, value) {
-  const row = rows.find(r=>r.id===id);
-  if (!row) return;
-  if (!row.status) row.status = {};
-  row.status[field] = value;
-  saveData();
-  const tr = document.querySelector(`tr[data-id="${id}"]`);
-  if (tr) {
-    const sc  = tr.querySelector('.status-cell');
-    const old = sc && sc.querySelector('.status-badge');
-    if (sc) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = getStatusBadge(row.status);
-      if (old) old.replaceWith(tmp.firstChild); else sc.appendChild(tmp.firstChild);
+/* ── DETAIL MODAL ────────────────────────────────────────────────────────── */
+function openDetail(id){
+  openRowId=id;
+  renderDetailModal();
+  document.getElementById('detailOverlay').classList.add('show');
+}
+function closeDetail(){
+  document.getElementById('detailOverlay').classList.remove('show');
+  openRowId=null;
+  // sync full render after modal close (stats may have changed)
+  renderAll();
+}
+
+function renderDetailModal(){
+  const row=rows.find(r=>r.id===openRowId); if(!row) return;
+  const inc=rowInc(row),exp=rowExp(row),pft=inc-exp,rai=rowRai(row);
+  const st=row.status||{};
+  document.getElementById('dmTitle').textContent=thaiDate(row.date)||'รายละเอียด';
+
+  // delete button
+  const delBtn=document.getElementById('dmDelBtn');
+  delBtn.onclick=()=>{ closeDetail(); askDelete(row.id); };
+
+  document.getElementById('dmBody').innerHTML=`
+    <!-- ข้อมูลงาน -->
+    <div class="dm-section">
+      <div class="dm-sec-title">📋 ข้อมูลงาน</div>
+      <div class="field-group">
+        <div class="field">
+          <label>วันที่</label>
+          <input type="date" value="${esc(row.date||'')}"
+            onchange="window._app.dmUpField('date',this.value)">
+        </div>
+        <div class="field">
+          <label>วัน</label>
+          <input type="text" value="${esc(dayName(row.date))}" readonly style="color:var(--text3)">
+        </div>
+        <div class="field full">
+          <label>งานช่วงเช้า</label>
+          <textarea rows="2"
+            oninput="window._app.dmUpSilent('morning',this.value)"
+            onchange="window._app.dmUpField('morning',this.value)">${esc(row.morning||'')}</textarea>
+        </div>
+        <div class="field full">
+          <label>งานช่วงเย็น</label>
+          <textarea rows="2"
+            oninput="window._app.dmUpSilent('evening',this.value)"
+            onchange="window._app.dmUpField('evening',this.value)">${esc(row.evening||'')}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- รายรับ -->
+    <div class="dm-section">
+      <div class="dm-sec-title">💰 รายรับ — รวม <span style="color:var(--accent)">${fmt(inc)}</span> · ${fmtRai(rai)} ไร่</div>
+      <div id="dmIncTable">${buildIncTable(row)}</div>
+      <button class="btn sm" style="margin-top:6px" onclick="window._app.dmAddInc()">＋ เพิ่มรายรับ</button>
+    </div>
+
+    <!-- รายจ่าย -->
+    <div class="dm-section">
+      <div class="dm-sec-title">💸 รายจ่าย — รวม <span style="color:var(--red)">${fmt(exp)}</span></div>
+      <div id="dmExpTable">${buildExpTable(row)}</div>
+      <button class="btn sm" style="margin-top:6px" onclick="window._app.dmAddExp()">＋ เพิ่มรายจ่าย</button>
+    </div>
+
+    <!-- สถานะ -->
+    <div class="dm-section">
+      <div class="dm-sec-title">✅ สถานะ</div>
+      <div class="check-list">
+        <label class="chk-label">
+          <input type="checkbox" ${st.morning?'checked':''}
+            onchange="window._app.dmUpStatus('morning',this.checked)"> งานเช้าเสร็จแล้ว
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" ${st.evening?'checked':''}
+            onchange="window._app.dmUpStatus('evening',this.checked)"> งานเย็นเสร็จแล้ว
+        </label>
+        <label class="chk-label">
+          <input type="checkbox" ${st.paid?'checked':''}
+            onchange="window._app.dmUpStatus('paid',this.checked)"> เก็บเงินแล้ว
+        </label>
+      </div>
+    </div>
+
+    <!-- หมายเหตุ -->
+    <div class="dm-section">
+      <div class="dm-sec-title">📝 หมายเหตุ</div>
+      <div class="field">
+        <textarea rows="3" placeholder="หมายเหตุ..."
+          oninput="window._app.dmUpSilent('note',this.value)"
+          onchange="window._app.dmUpField('note',this.value)">${esc(row.note||'')}</textarea>
+      </div>
+    </div>
+
+    <!-- สรุป -->
+    <div class="dm-section">
+      <div class="dm-sec-title">📊 สรุป</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:8px">
+        <div class="stat-card"><div class="sc-label">รายรับ</div><div class="sc-val g">${fmt(inc)}</div></div>
+        <div class="stat-card"><div class="sc-label">รายจ่าย</div><div class="sc-val r">${fmt(exp)}</div></div>
+        <div class="stat-card"><div class="sc-label">กำไร</div><div class="sc-val ${pft>=0?'y':'r'}">${fmt(pft)}</div></div>
+        <div class="stat-card"><div class="sc-label">รวมไร่</div><div class="sc-val t">${fmtRai(rai)} ไร่</div></div>
+      </div>
+    </div>
+  `;
+}
+
+/* rebuild only income table inside modal */
+function rebuildDmInc(){
+  const el=document.getElementById('dmIncTable'); if(!el) return;
+  const row=rows.find(r=>r.id===openRowId); if(!row) return;
+  el.innerHTML=buildIncTable(row);
+  updateDmSummary(row);
+}
+function rebuildDmExp(){
+  const el=document.getElementById('dmExpTable'); if(!el) return;
+  const row=rows.find(r=>r.id===openRowId); if(!row) return;
+  el.innerHTML=buildExpTable(row);
+  updateDmSummary(row);
+}
+function updateDmSummary(row){
+  const inc=rowInc(row),exp=rowExp(row),pft=inc-exp,rai=rowRai(row);
+  // update section titles
+  const secs=document.querySelectorAll('#dmBody .dm-sec-title');
+  if(secs[1]) secs[1].innerHTML=`💰 รายรับ — รวม <span style="color:var(--accent)">${fmt(inc)}</span> · ${fmtRai(rai)} ไร่`;
+  if(secs[2]) secs[2].innerHTML=`💸 รายจ่าย — รวม <span style="color:var(--red)">${fmt(exp)}</span>`;
+  // update summary cards
+  const cards=document.querySelectorAll('#dmBody .stat-grid .sc-val');
+  if(cards[0]) cards[0].textContent=fmt(inc);
+  if(cards[1]) cards[1].textContent=fmt(exp);
+  if(cards[2]){cards[2].textContent=fmt(pft);cards[2].className='sc-val '+(pft>=0?'y':'r');}
+  if(cards[3]) cards[3].textContent=fmtRai(rai)+' ไร่';
+  // update modal title
+  const dmT=document.getElementById('dmTitle'); if(dmT) dmT.textContent=thaiDate(row.date)||'รายละเอียด';
+}
+
+function buildIncTable(row){
+  const arr=row.incomeItems||[];
+  if(!arr.length) return '<div style="font-size:.8rem;color:var(--text3);padding:6px 0">ยังไม่มีรายรับ</div>';
+  return `<table class="items-table">
+    <thead><tr><th class="it-name">ชื่อ/งาน</th><th style="width:56px;text-align:right">ไร่</th><th style="width:80px;text-align:right">บาท</th><th style="width:62px;text-align:center">ประเภท</th><th style="width:26px"></th></tr></thead>
+    <tbody>${arr.map((item,idx)=>`<tr>
+      <td><input class="it-input" type="text" value="${esc(item.name||'')}" placeholder="ชื่อ..."
+        oninput="window._app.dmUpInc(${idx},'name',this.value)"
+        onchange="window._app.dmUpInc(${idx},'name',this.value)"></td>
+      <td><input class="it-input rai" type="number" min="0" step="0.25" value="${esc(String(item.rai??''))}" placeholder="0"
+        oninput="window._app.dmUpInc(${idx},'rai',this.value)"
+        onchange="window._app.dmUpInc(${idx},'rai',this.value)"></td>
+      <td><input class="it-input amt" type="number" min="0" step="any" value="${esc(String(item.amount??''))}" placeholder="0"
+        oninput="window._app.dmUpInc(${idx},'amount',this.value)"
+        onchange="window._app.dmUpInc(${idx},'amount',this.value)"></td>
+      <td><select class="it-sel" onchange="window._app.dmUpInc(${idx},'paymentType',this.value)">
+        <option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵สด</option>
+        <option value="โอน"    ${(item.paymentType||'เงินสด')==='โอน'?'selected':''}>📲โอน</option>
+      </select></td>
+      <td><button class="it-del" onclick="window._app.dmDelInc(${idx})">×</button></td>
+    </tr>`).join('')}</tbody>
+    <tr><td colspan="5"><div class="items-total">รวม ${fmt(arr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0))} · ${fmtRai(arr.reduce((s,i)=>s+(parseFloat(i.rai)||0),0))} ไร่</div></td></tr>
+  </table>`;
+}
+
+function buildExpTable(row){
+  const arr=row.expenseItems||[];
+  if(!arr.length) return '<div style="font-size:.8rem;color:var(--text3);padding:6px 0">ยังไม่มีรายจ่าย</div>';
+  return `<table class="items-table">
+    <thead><tr><th class="it-name">รายการ</th><th style="width:80px;text-align:right">บาท</th><th style="width:62px;text-align:center">ประเภท</th><th style="width:26px"></th></tr></thead>
+    <tbody>${arr.map((item,idx)=>`<tr>
+      <td><input class="it-input" type="text" value="${esc(item.name||'')}" placeholder="รายการ..."
+        oninput="window._app.dmUpExp(${idx},'name',this.value)"
+        onchange="window._app.dmUpExp(${idx},'name',this.value)"></td>
+      <td><input class="it-input amt exp" type="number" min="0" step="any" value="${esc(String(item.amount??''))}" placeholder="0"
+        oninput="window._app.dmUpExp(${idx},'amount',this.value)"
+        onchange="window._app.dmUpExp(${idx},'amount',this.value)"></td>
+      <td><select class="it-sel" onchange="window._app.dmUpExp(${idx},'paymentType',this.value)">
+        <option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵สด</option>
+        <option value="โอน"    ${(item.paymentType||'เงินสด')==='โอน'?'selected':''}>📲โอน</option>
+      </select></td>
+      <td><button class="it-del" onclick="window._app.dmDelExp(${idx})">×</button></td>
+    </tr>`).join('')}</tbody>
+    <tr><td colspan="4"><div class="items-total">รวม ${fmt(arr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0))}</div></td></tr>
+  </table>`;
+}
+
+/* ── Modal field updaters ─────────────────────────────────────────────────── */
+function dmUpSilent(field,val){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  r[field]=val; saveLocal(); fbWrite();
+}
+function dmUpField(field,val){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  r[field]=val; save();
+  if(field==='date'){
+    updateDmSummary(r);
+    // also patch table row if visible
+    const tr=document.querySelector(`tr[data-id="${r.id}"]`);
+    if(tr){
+      const dt=tr.querySelector('.day-tag'); if(dt) dt.textContent=dayName(val);
+      const df=tr.querySelector('.date-fmt'); if(df) df.textContent=thaiDate(val);
+      tr.classList.toggle('today',val===todayStr());
     }
+    // patch card if visible
+    const dc=document.querySelector(`.day-card[data-id="${r.id}"] .dc-date`);
+    if(dc) dc.textContent=thaiDate(val)||'ไม่มีวันที่';
+    updateMonthly();
   }
-  updateDashboard();
+}
+function dmUpStatus(field,val){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  if(!r.status) r.status={};
+  r.status[field]=val; save();
+  // patch badge in table
+  const tr=document.querySelector(`tr[data-id="${r.id}"]`);
+  if(tr){const sc=tr.querySelector('.status-c');if(sc){const tmp=document.createElement('div');tmp.innerHTML=badge(r.status);sc.innerHTML=tmp.innerHTML;}}
+  // patch badge in card
+  const dc=document.querySelector(`.day-card[data-id="${r.id}"] .dc-top .sbadge`);
+  if(dc){const tmp=document.createElement('div');tmp.innerHTML=badge(r.status);const nb=tmp.querySelector('.sbadge');if(nb)dc.replaceWith(nb);}
+  updateStats();
+}
+function dmUpInc(idx,field,val){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  if(!r.incomeItems[idx]) return;
+  r.incomeItems[idx][field]=(field==='amount'||field==='rai')?(val===''?'':(parseFloat(val)||0)):val;
+  saveLocal(); fbWrite();
+  updateDmSummary(r); updateStats(); updateMonthly();
+}
+function dmUpExp(idx,field,val){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  if(!r.expenseItems[idx]) return;
+  r.expenseItems[idx][field]=field==='amount'?(val===''?'':(parseFloat(val)||0)):val;
+  saveLocal(); fbWrite();
+  updateDmSummary(r); updateStats(); updateMonthly();
+}
+function dmAddInc(){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  r.incomeItems.push({name:'',amount:'',rai:0,paymentType:'เงินสด'});
+  saveNow(); rebuildDmInc();
+}
+function dmDelInc(idx){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  r.incomeItems.splice(idx,1); saveNow(); rebuildDmInc();
+  updateStats(); updateMonthly();
+}
+function dmAddExp(){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  r.expenseItems.push({name:'',amount:'',paymentType:'เงินสด'});
+  saveNow(); rebuildDmExp();
+}
+function dmDelExp(idx){
+  const r=rows.find(x=>x.id===openRowId); if(!r) return;
+  r.expenseItems.splice(idx,1); saveNow(); rebuildDmExp();
+  updateStats(); updateMonthly();
 }
 
-// ── Item CRUD ─────────────────────────────────────────────────────────────────
-function addItem(rowId, type) {
-  const row = rows.find(r=>r.id===rowId);
-  if (!row) return;
-  const key = type==='income' ? 'incomeItems' : 'expenseItems';
-  if (!Array.isArray(row[key])) row[key] = [];
-  if (type === 'income') {
-    row[key].push({ name:'', amount:'', rai:0, paymentType:'เงินสด' });
-  } else {
-    row[key].push({ name:'', amount:'', paymentType:'เงินสด' });
-  }
-  saveDataImmediate();
-  reRenderItemCell(row, type);
-  updateMoneyDisplay(row);
+/* ── Confirm modal ───────────────────────────────────────────────────────── */
+function showConfirm(title,msg,cb,okLabel='ยืนยัน'){
+  pendingCf=cb;
+  document.getElementById('cfTitle').textContent=title;
+  document.getElementById('cfMsg').textContent=msg;
+  const btn=document.getElementById('cfOkBtn');
+  btn.textContent=okLabel;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('show');pendingCf=null;}
+document.getElementById('cfOkBtn').addEventListener('click',()=>{if(pendingCf)pendingCf();closeConfirm();});
+document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('confirmOverlay'))closeConfirm();});
+
+function askDelete(id){
+  showConfirm('ยืนยันการลบ','คุณต้องการลบรายการนี้ใช่ไหม? ไม่สามารถย้อนกลับได้',()=>{
+    rows=rows.filter(r=>r.id!==id); saveNow(); renderAll(); showToast('ลบรายการแล้ว','ok');
+  },'ลบ');
+}
+function confirmClearAll(){
+  if(!rows.length){showToast('ไม่มีรายการให้ล้าง','err');return;}
+  showConfirm('ยืนยันการล้างข้อมูล',`ต้องการล้างรายการทั้งหมด ${rows.length} รายการ? ข้อมูลจะหายถาวร`,()=>{
+    rows=[]; saveNow(); renderAll(); showToast('ล้างข้อมูลทั้งหมดแล้ว','ok');
+  },'ล้างทั้งหมด');
 }
 
-function delItem(rowId, type, idx) {
-  const row = rows.find(r=>r.id===rowId);
-  if (!row) return;
-  const key = type==='income' ? 'incomeItems' : 'expenseItems';
-  if (!Array.isArray(row[key])) return;
-  row[key].splice(idx, 1);
-  saveDataImmediate();
-  reRenderItemCell(row, type);
-  updateMoneyDisplay(row);
-}
-
-// upItemField: oninput/onchange → localStorage + Firebase debounce + update money display
-function upItemField(rowId, type, idx, field, value) {
-  const row = rows.find(r=>r.id===rowId);
-  if (!row) return;
-  const key = type==='income' ? 'incomeItems' : 'expenseItems';
-  if (!Array.isArray(row[key]) || row[key][idx] === undefined) return;
-
-  if (field === 'amount' || field === 'rai') {
-    row[key][idx][field] = value === '' ? '' : (parseFloat(value) || 0);
-  } else {
-    row[key][idx][field] = value;
-  }
-  saveLocal();
-  writeToFirebase();
-  updateMoneyDisplay(row);
-}
-
-function reRenderItemCell(row, type) {
-  const el = document.getElementById(`items-${type}-${row.id}`);
-  if (!el) return;
-  const tmp = document.createElement('div');
-  if (type === 'income') {
-    tmp.innerHTML = renderIncomeItemList(row.id, row.incomeItems||[]);
-  } else {
-    tmp.innerHTML = renderExpenseItemList(row.id, row.expenseItems||[]);
-  }
-  el.replaceWith(tmp.firstChild);
-}
-
-// อัปเดตยอดเงิน + dashboard + monthly โดยไม่ redraw ตาราง
-function updateMoneyDisplay(row) {
-  const inc = getRowIncome(row), exp = getRowExpense(row), pft = inc-exp;
-  const el = id => document.getElementById(id);
-  if (el(`inc-total-${row.id}`)) el(`inc-total-${row.id}`).textContent = formatMoney(inc);
-  if (el(`exp-total-${row.id}`)) el(`exp-total-${row.id}`).textContent = formatMoney(exp);
-  if (el(`profit-${row.id}`)) {
-    el(`profit-${row.id}`).textContent  = formatMoney(pft);
-    el(`profit-${row.id}`).className    = 'profit-display '+(pft>0?'pos':pft<0?'neg':'zero');
-  }
-  updateDashboard();
-  updateMonthly();
-}
-
-// ── Delete / duplicate row ────────────────────────────────────────────────────
-function confirmDelete(id) {
-  pendingAction = () => { rows=rows.filter(r=>r.id!==id); saveDataImmediate(); renderTable(); showToast('ลบรายการแล้ว','success'); };
-  document.getElementById('modalTitle').textContent = 'ยืนยันการลบ';
-  document.getElementById('modalMsg').textContent   = 'คุณต้องการลบรายการนี้ใช่ไหม? การดำเนินการนี้ไม่สามารถย้อนกลับได้';
-  document.getElementById('modalConfirmBtn').textContent = 'ลบ';
-  document.getElementById('modalConfirmBtn').className   = 'btn danger';
-  showModal();
-}
-function duplicateRow(id) {
-  const row = rows.find(r=>r.id===id);
-  if (!row) return;
-  const newRow = JSON.parse(JSON.stringify(row));
-  newRow.id = genId();
-  rows.splice(rows.indexOf(row)+1, 0, newRow);
-  saveData(); renderTable(); showToast('คัดลอกรายการแล้ว','success');
-}
-function confirmClearAll() {
-  if (!rows.length) { showToast('ไม่มีรายการให้ล้าง','error'); return; }
-  pendingAction = () => { rows=[]; saveDataImmediate(); renderTable(); showToast('ล้างข้อมูลทั้งหมดแล้ว','success'); };
-  document.getElementById('modalTitle').textContent = 'ยืนยันการล้างข้อมูล';
-  document.getElementById('modalMsg').textContent   = `คุณต้องการล้างรายการทั้งหมด ${rows.length} รายการใช่ไหม? ข้อมูลจะหายถาวร`;
-  document.getElementById('modalConfirmBtn').textContent = 'ล้างทั้งหมด';
-  document.getElementById('modalConfirmBtn').className   = 'btn danger';
-  showModal();
-}
-
-// ── Sort ──────────────────────────────────────────────────────────────────────
-function sortByDate() {
+/* ── Sort / Search ───────────────────────────────────────────────────────── */
+function sortByDate(){
   rows.sort((a,b)=>{
-    if(!a.date&&!b.date) return 0; if(!a.date) return 1; if(!b.date) return -1;
-    return sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+    if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;
+    return sortAsc?a.date.localeCompare(b.date):b.date.localeCompare(a.date);
   });
-  sortAsc = !sortAsc;
-  saveData(); renderTable();
+  sortAsc=!sortAsc; save(); renderAll();
+}
+function filterRows(){ searchQuery=document.getElementById('searchInput').value; renderTable(); renderCards(); }
+
+/* ── Export / Import ─────────────────────────────────────────────────────── */
+function exportJSON(){
+  if(!rows.length){showToast('ไม่มีข้อมูลให้ส่งออก','err');return;}
+  const b=new Blob([JSON.stringify(rows,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');
+  a.href=u;a.download='spray_'+todayStr()+'.json';a.click();URL.revokeObjectURL(u);
+  showToast('ส่งออกแล้ว','ok');
+}
+function importJSON(e){
+  const file=e.target.files[0];if(!file)return;
+  showConfirm('ยืนยันการนำเข้า','⚠️ การนำเข้าจะแทนที่ข้อมูลทั้งหมด กรุณาสำรองข้อมูลก่อน',()=>{
+    const rd=new FileReader();
+    rd.onload=ev=>{
+      try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw 0;rows=d.map(norm);saveNow();renderAll();showToast(`นำเข้า ${rows.length} รายการแล้ว`,'ok');}
+      catch{showToast('ไฟล์ไม่ถูกต้อง','err');}
+    };rd.readAsText(file);
+  },'นำเข้า');
+  e.target.value='';
 }
 
-// ── Search ────────────────────────────────────────────────────────────────────
-function filterRows() {
-  searchQuery = document.getElementById('searchInput').value;
-  renderTable();
-}
-
-// ── Export / Import ───────────────────────────────────────────────────────────
-function exportJSON() {
-  if (!rows.length) { showToast('ไม่มีข้อมูลให้ส่งออก','error'); return; }
-  const blob = new Blob([JSON.stringify(rows,null,2)],{type:'application/json'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href=url; a.download='spray_jobs_'+todayStr()+'.json'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('ส่งออกข้อมูลแล้ว','success');
-}
-function importJSON(e) {
-  const file = e.target.files[0]; if(!file) return;
-  pendingAction = () => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (!Array.isArray(data)) throw new Error('invalid');
-        rows = data.map(normalizeRow);
-        saveDataImmediate(); renderTable();
-        showToast(`นำเข้าข้อมูล ${rows.length} รายการแล้ว`,'success');
-      } catch(err) { showToast('ไฟล์ไม่ถูกต้อง','error'); }
-    };
-    reader.readAsText(file);
-  };
-  document.getElementById('modalTitle').textContent = 'ยืนยันการนำเข้าข้อมูล';
-  document.getElementById('modalMsg').textContent   = '⚠️ การนำเข้าจะแทนที่ข้อมูลทั้งหมดที่มีอยู่ กรุณาสำรองข้อมูลก่อน';
-  document.getElementById('modalConfirmBtn').textContent = 'นำเข้า';
-  document.getElementById('modalConfirmBtn').className   = 'btn primary';
-  showModal();
-  e.target.value = '';
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function showModal() { document.getElementById('modalOverlay').classList.add('show'); }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); pendingAction = null; }
-document.getElementById('modalConfirmBtn').addEventListener('click', () => { if(pendingAction) pendingAction(); closeModal(); });
-document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); });
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
-function showToast(msg, type='success') {
-  const c = document.getElementById('toastContainer'); if(!c) return;
-  const t = document.createElement('div');
-  t.className = 'toast '+type;
-  t.innerHTML = (type==='success'?'✅':type==='info'?'ℹ️':'❌')+' '+msg;
-  c.appendChild(t);
-  setTimeout(()=>t.remove(), 3000);
-}
-
-// ── Theme ─────────────────────────────────────────────────────────────────────
-document.getElementById('themeToggle').addEventListener('click', () => {
-  const next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  document.getElementById('themeToggle').textContent = next==='dark'?'☀️':'🌙';
+/* ── Theme ───────────────────────────────────────────────────────────────── */
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);
+  localStorage.setItem('theme',n);
+  document.getElementById('themeToggle').textContent=n==='dark'?'☀️':'🌙';
 });
 
-// ── Print ─────────────────────────────────────────────────────────────────────
-function printPage() {
-  document.getElementById('printDate').textContent = 'พิมพ์วันที่: '+formatThaiDate(todayStr());
-  window.print();
+/* ── Print ───────────────────────────────────────────────────────────────── */
+function printPage(){document.getElementById('printDate').textContent='พิมพ์วันที่: '+thaiDate(todayStr());window.print();}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+function showToast(msg,type='ok'){
+  const c=document.getElementById('toastC');if(!c)return;
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=(type==='ok'?'✅':type==='info'?'ℹ️':'❌')+' '+msg;
+  c.appendChild(t);setTimeout(()=>t.remove(),3000);
 }
 
-// ── Keyboard ──────────────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+/* ── Keyboard ────────────────────────────────────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('detailOverlay').classList.contains('show')){closeDetail();}
+    else if(document.getElementById('confirmOverlay').classList.contains('show')){closeConfirm();}
+  }
+});
+// close detail on overlay click
+document.getElementById('detailOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('detailOverlay'))closeDetail();});
 
-// ── Public API ────────────────────────────────────────────────────────────────
-window._app = {
-  addRow, addTodayRow, sortByDate, filterRows,
-  exportJSON, importJSON, confirmClearAll,
-  upField, upFieldSilent, upStatus, confirmDelete, duplicateRow,
-  closeModal, printPage,
-  addItem, delItem, upItemField,
-  updateMonthly, setMonthNow, setMonthPrev
+/* ── Public API ──────────────────────────────────────────────────────────── */
+window._app={
+  addRow,addTodayRow,sortByDate,filterRows,exportJSON,importJSON,confirmClearAll,
+  upField,upSilent,askDelete,dupRow,closeDetail,closeConfirm,printPage,
+  openDetail,setMonthNow,setMonthPrev,updateMonthly,
+  dmUpField,dmUpSilent,dmUpStatus,dmUpInc,dmUpExp,dmAddInc,dmDelInc,dmAddExp,dmDelExp,
 };
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
-(function boot() {
-  const theme = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('themeToggle').textContent = theme==='dark'?'☀️':'🌙';
-  initMonthlySelects();
-  rows = loadLocal().map(normalizeRow);
-  if (rows.length) renderTable();
+/* ── Boot ────────────────────────────────────────────────────────────────── */
+(function boot(){
+  const th=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',th);
+  document.getElementById('themeToggle').textContent=th==='dark'?'☀️':'🌙';
+  initMonthSel();
+  rows=loadLocal().map(norm);
+  if(rows.length) renderAll();
 })();
 </script>
 </body>
