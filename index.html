@@ -40,11 +40,11 @@
 
 /* ── Beige Minimal ───────────────────────────────────────── */
 [data-theme="beige"] {
-  --bg:       #F8F5F0;
+  --bg:       #FAF7F2;
   --bg2:      #FFFFFF;
-  --bg3:      #F1ECE4;
-  --bg4:      #E8E0D3;
-  --border:   #E2D8C8;
+  --bg3:      #F5EFE6;
+  --bg4:      #ECE3D5;
+  --border:   #DED2BF;
   --text:     #1F2937;
   --text2:    #6B7280;
   --text3:    #9CA3AF;
@@ -67,11 +67,11 @@
 
 /* ── Blue Glass ─────────────────────────────────────────── */
 [data-theme="glass"] {
-  --bg:       #D4EAFB;
-  --bg2:      rgba(255,255,255,0.68);
-  --bg3:      rgba(255,255,255,0.42);
-  --bg4:      rgba(255,255,255,0.75);
-  --border:   rgba(14,165,233,0.22);
+  --bg:       #EEF7FF;
+  --bg2:      #FFFFFF;
+  --bg3:      #F8FCFF;
+  --bg4:      #E0F2FE;
+  --border:   #BAE6FD;
   --text:     #0F172A;
   --text2:    #475569;
   --text3:    #94A3B8;
@@ -89,7 +89,21 @@
   --purple:   #7C3AED;
   --shadow:   0 8px 32px rgba(14,165,233,0.18);
   --shadow-s: 0 2px 10px rgba(14,165,233,0.12);
-  --glass-fx: blur(14px);
+  --glass-fx: none;
+}
+
+/* Desktop glass effect only */
+@media(min-width:769px){
+  [data-theme="glass"] {
+    --bg2:  rgba(255,255,255,0.92);
+    --bg3:  rgba(248,252,255,0.90);
+    --bg4:  rgba(224,242,254,0.95);
+    --glass-fx: blur(10px);
+  }
+  [data-theme="glass"] body {
+    background: linear-gradient(135deg,#E0F2FE 0%,#F8FAFC 55%,#EDE9FE 100%);
+    background-attachment: fixed;
+  }
 }
 
 /* ── Gray + Blue Clean ───────────────────────────────────── */
@@ -125,7 +139,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:15px}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;transition:background .3s,color .3s}
-[data-theme="glass"] body{background:linear-gradient(135deg,#E0F2FE 0%,#F8FAFC 55%,#EDE9FE 100%);background-attachment:fixed}
 button{font-family:var(--font);cursor:pointer}
 input,textarea,select{font-family:var(--font)}
 
@@ -262,7 +275,7 @@ td.act-c{min-width:90px;white-space:nowrap}
 
 /* ── Card list (mobile) ──────────────────────────────────── */
 .card-list{display:none;flex-direction:column;gap:10px}
-.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;backdrop-filter:var(--glass-fx);-webkit-backdrop-filter:var(--glass-fx)}
+.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
 .day-card.today{border-left:3px solid var(--accent)}
 .dc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
 .dc-date{font-size:.9rem;font-weight:500}
@@ -281,20 +294,20 @@ td.act-c{min-width:90px;white-space:nowrap}
 .empty p{font-size:.84rem}
 
 /* ── Overlays ────────────────────────────────────────────── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.50);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.50);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
 .overlay.show{opacity:1;pointer-events:all}
 @media(min-width:600px){.overlay{align-items:center}}
 
-.detail-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow);transform:translateY(20px);transition:transform .22s;display:flex;flex-direction:column;backdrop-filter:var(--glass-fx);-webkit-backdrop-filter:var(--glass-fx)}
+.detail-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow);transform:translateY(20px);transition:transform .22s;display:flex;flex-direction:column}
 @media(min-width:600px){.detail-modal{border-radius:var(--r);max-height:88vh;transform:scale(.97)}}
 .overlay.show .detail-modal{transform:none}
 @media(min-width:600px){.overlay.show .detail-modal{transform:scale(1)}}
 
-.dm-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg2);z-index:2;backdrop-filter:var(--glass-fx);-webkit-backdrop-filter:var(--glass-fx)}
+.dm-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg2);z-index:2}
 .dm-title{font-size:1rem;font-weight:600;flex:1}
 .dm-close{width:30px;height:30px;border:none;background:transparent;color:var(--text3);font-size:1.2rem;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s}
 .dm-close:hover{background:var(--bg3);color:var(--text)}
-.dm-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:20px}
+.dm-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
 .dm-section{display:flex;flex-direction:column;gap:10px}
 .dm-sec-title{font-size:.72rem;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .field-group{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -305,6 +318,7 @@ td.act-c{min-width:90px;white-space:nowrap}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
 .field textarea{resize:vertical;min-height:60px;line-height:1.5}
 
+/* ── Desktop items table ── */
 .items-table{width:100%;border-collapse:collapse}
 .items-table th{font-size:.7rem;color:var(--text3);font-weight:500;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
 .items-table td{padding:5px 6px;vertical-align:middle}
@@ -319,13 +333,25 @@ td.act-c{min-width:90px;white-space:nowrap}
 .it-del:hover{color:var(--red);background:var(--red-d)}
 .items-total{font-size:.78rem;color:var(--text2);text-align:right;padding:6px 6px 0;font-weight:500}
 
+/* ── Mobile item cards ── */
+.item-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-s);padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.item-card:last-child{margin-bottom:0}
+.item-field{display:flex;flex-direction:column;gap:4px}
+.item-field label{font-size:.72rem;color:var(--text3);font-weight:500}
+.item-field input,.item-field select{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:.9rem;width:100%;min-height:44px;transition:all .15s;-webkit-appearance:none;appearance:none}
+.item-field input:focus,.item-field select:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
+.item-field input[type=number]{color:var(--accent)}
+.item-field input[type=number].exp-amt{color:var(--red)}
+.item-del-btn{width:100%;padding:10px;border:1px solid var(--red-d);background:transparent;color:var(--red);border-radius:8px;font-size:.84rem;font-weight:500;min-height:44px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.item-del-btn:hover,.item-del-btn:active{background:var(--red-d)}
+
 .check-list{display:flex;flex-direction:column;gap:8px}
 .chk-label{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--text2);cursor:pointer;user-select:none}
 .chk-label input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0}
 
-.dm-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg2);backdrop-filter:var(--glass-fx);-webkit-backdrop-filter:var(--glass-fx)}
+.dm-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg2)}
 
-.confirm-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;max-width:380px;width:90%;box-shadow:var(--shadow);transform:scale(.96);transition:transform .22s;backdrop-filter:var(--glass-fx);-webkit-backdrop-filter:var(--glass-fx)}
+.confirm-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;max-width:380px;width:90%;box-shadow:var(--shadow);transform:scale(.96);transition:transform .22s}
 .overlay.show .confirm-modal{transform:scale(1)}
 .confirm-modal h3{font-size:.95rem;font-weight:600;margin-bottom:8px}
 .confirm-modal p{font-size:.84rem;color:var(--text2);margin-bottom:18px;line-height:1.6}
@@ -333,7 +359,7 @@ td.act-c{min-width:90px;white-space:nowrap}
 
 /* ── Toast ───────────────────────────────────────────────── */
 .toast-c{position:fixed;bottom:20px;right:20px;z-index:400;display:flex;flex-direction:column;gap:6px;pointer-events:none}
-.toast{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-s);padding:9px 14px;font-size:.82rem;color:var(--text);box-shadow:var(--shadow-s);display:flex;align-items:center;gap:7px;animation:toastIn .25s ease,toastOut .25s ease 2.6s forwards;backdrop-filter:var(--glass-fx);-webkit-backdrop-filter:var(--glass-fx)}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-s);padding:9px 14px;font-size:.82rem;color:var(--text);box-shadow:var(--shadow-s);display:flex;align-items:center;gap:7px;animation:toastIn .25s ease,toastOut .25s ease 2.6s forwards}
 .toast.ok{border-left:3px solid var(--accent)}.toast.err{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--blue)}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0}}
@@ -349,7 +375,7 @@ td.act-c{min-width:90px;white-space:nowrap}
 .print-hdr{display:none;text-align:center;margin-bottom:14px}
 
 /* ── Responsive ──────────────────────────────────────────── */
-@media(max-width:600px){
+@media(max-width:768px){
   .wrap{padding:12px}
   .stat-grid{grid-template-columns:repeat(2,1fr);gap:8px}
   .tbl-wrap{display:none}
@@ -360,9 +386,47 @@ td.act-c{min-width:90px;white-space:nowrap}
   .srch:focus{width:150px}
   .conn-text{display:none}
   .sc-val{font-size:1.1rem}
-  .detail-modal{max-height:96vh}
   .t-lbl{display:none}
+
+  /* Modal full screen on mobile */
+  .detail-modal{
+    width:100vw;
+    max-width:100vw;
+    max-height:96vh;
+    border-radius:var(--r) var(--r) 0 0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .dm-body{
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    flex:1;
+    min-height:0;
+  }
+  .dm-footer{
+    flex-shrink:0;
+    padding:12px 16px;
+    padding-bottom:max(12px,env(safe-area-inset-bottom));
+  }
+  .dm-header{
+    flex-shrink:0;
+    padding:14px 16px 12px;
+  }
+
+  /* Hide desktop table in modal, show cards */
+  .items-table{display:none}
+  .items-total{display:none}
+  .item-cards-wrap{display:flex;flex-direction:column}
+
+  .field-group{grid-template-columns:1fr}
+  .field.full{grid-column:unset}
 }
+
+@media(min-width:769px){
+  .item-cards-wrap{display:none}
+}
+
 @media(min-width:601px) and (max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
 
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -545,6 +609,8 @@ let db=null, fbReady=false, activeInput=null, pendingSnap=null, ignoreSnaps=0, w
 
 const DAYS=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
 const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+const isMobile = () => window.innerWidth <= 768;
 
 /* ══════════════════════════════
    THEME SYSTEM
@@ -795,11 +861,13 @@ function renderDetailModal(){
     <div class="dm-section">
       <div class="dm-sec-title">💰 รายรับ — รวม <span style="color:var(--accent)">${fmt(inc)}</span> · ${fmtRai(rai)} ไร่</div>
       <div id="dmIncTable">${buildIncTable(row)}</div>
+      <div class="item-cards-wrap" id="dmIncCards">${buildIncCards(row)}</div>
       <button class="btn sm" style="margin-top:6px" onclick="window._app.dmAddInc()">＋ เพิ่มรายรับ</button>
     </div>
     <div class="dm-section">
       <div class="dm-sec-title">💸 รายจ่าย — รวม <span style="color:var(--red)">${fmt(exp)}</span></div>
       <div id="dmExpTable">${buildExpTable(row)}</div>
+      <div class="item-cards-wrap" id="dmExpCards">${buildExpCards(row)}</div>
       <button class="btn sm" style="margin-top:6px" onclick="window._app.dmAddExp()">＋ เพิ่มรายจ่าย</button>
     </div>
     <div class="dm-section">
@@ -825,8 +893,22 @@ function renderDetailModal(){
     </div>`;
 }
 
-function rebuildDmInc(){const el=document.getElementById('dmIncTable');if(!el)return;const r=rows.find(x=>x.id===openRowId);if(!r)return;el.innerHTML=buildIncTable(r);updateDmSummary(r);}
-function rebuildDmExp(){const el=document.getElementById('dmExpTable');if(!el)return;const r=rows.find(x=>x.id===openRowId);if(!r)return;el.innerHTML=buildExpTable(r);updateDmSummary(r);}
+function rebuildDmInc(){
+  const el=document.getElementById('dmIncTable');
+  const el2=document.getElementById('dmIncCards');
+  const r=rows.find(x=>x.id===openRowId);if(!r)return;
+  if(el)el.innerHTML=buildIncTable(r);
+  if(el2)el2.innerHTML=buildIncCards(r);
+  updateDmSummary(r);
+}
+function rebuildDmExp(){
+  const el=document.getElementById('dmExpTable');
+  const el2=document.getElementById('dmExpCards');
+  const r=rows.find(x=>x.id===openRowId);if(!r)return;
+  if(el)el.innerHTML=buildExpTable(r);
+  if(el2)el2.innerHTML=buildExpCards(r);
+  updateDmSummary(r);
+}
 function updateDmSummary(row){
   const inc=rowInc(row),exp=rowExp(row),pft=inc-exp,rai=rowRai(row);
   const secs=document.querySelectorAll('#dmBody .dm-sec-title');
@@ -839,6 +921,7 @@ function updateDmSummary(row){
   const dmT=document.getElementById('dmTitle');if(dmT)dmT.textContent=thaiDate(row.date)||'รายละเอียด';
 }
 
+/* ── Desktop table builders ── */
 function buildIncTable(row){
   const arr=row.incomeItems||[];
   if(!arr.length)return'<div style="font-size:.8rem;color:var(--text3);padding:6px 0">ยังไม่มีรายรับ</div>';
@@ -859,6 +942,58 @@ function buildExpTable(row){
     <td><select class="it-sel" onchange="window._app.dmUpExp(${idx},'paymentType',this.value)"><option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵สด</option><option value="โอน" ${(item.paymentType||'เงินสด')==='โอน'?'selected':''}>📲โอน</option></select></td>
     <td><button class="it-del" onclick="window._app.dmDelExp(${idx})">×</button></td>
   </tr>`).join('')}</tbody><tr><td colspan="4"><div class="items-total">รวม ${fmt(arr.reduce((s,i)=>s+(parseFloat(i.amount)||0),0))}</div></td></tr></table>`;
+}
+
+/* ── Mobile card builders ── */
+function buildIncCards(row){
+  const arr=row.incomeItems||[];
+  if(!arr.length)return'<div style="font-size:.85rem;color:var(--text3);padding:8px 0">ยังไม่มีรายรับ</div>';
+  return arr.map((item,idx)=>`
+    <div class="item-card">
+      <div class="item-field">
+        <label>ชื่อ / งาน</label>
+        <input type="text" value="${esc(item.name||'')}" placeholder="ชื่องาน..." oninput="window._app.dmUpInc(${idx},'name',this.value)" onchange="window._app.dmUpInc(${idx},'name',this.value)">
+      </div>
+      <div class="item-field">
+        <label>จำนวนไร่</label>
+        <input type="number" min="0" step="0.25" value="${esc(String(item.rai??''))}" placeholder="0" style="color:var(--teal)" oninput="window._app.dmUpInc(${idx},'rai',this.value)" onchange="window._app.dmUpInc(${idx},'rai',this.value)">
+      </div>
+      <div class="item-field">
+        <label>จำนวนเงิน (บาท)</label>
+        <input type="number" min="0" step="any" value="${esc(String(item.amount??''))}" placeholder="0" oninput="window._app.dmUpInc(${idx},'amount',this.value)" onchange="window._app.dmUpInc(${idx},'amount',this.value)">
+      </div>
+      <div class="item-field">
+        <label>ประเภทเงิน</label>
+        <select onchange="window._app.dmUpInc(${idx},'paymentType',this.value)">
+          <option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵 เงินสด</option>
+          <option value="โอน" ${(item.paymentType||'เงินสด')==='โอน'?'selected':''}>📲 โอน</option>
+        </select>
+      </div>
+      <button class="item-del-btn" onclick="window._app.dmDelInc(${idx})">🗑 ลบรายการนี้</button>
+    </div>`).join('');
+}
+function buildExpCards(row){
+  const arr=row.expenseItems||[];
+  if(!arr.length)return'<div style="font-size:.85rem;color:var(--text3);padding:8px 0">ยังไม่มีรายจ่าย</div>';
+  return arr.map((item,idx)=>`
+    <div class="item-card">
+      <div class="item-field">
+        <label>ชื่อรายการ</label>
+        <input type="text" value="${esc(item.name||'')}" placeholder="ชื่อรายจ่าย..." oninput="window._app.dmUpExp(${idx},'name',this.value)" onchange="window._app.dmUpExp(${idx},'name',this.value)">
+      </div>
+      <div class="item-field">
+        <label>จำนวนเงิน (บาท)</label>
+        <input class="exp-amt" type="number" min="0" step="any" value="${esc(String(item.amount??''))}" placeholder="0" style="color:var(--red)" oninput="window._app.dmUpExp(${idx},'amount',this.value)" onchange="window._app.dmUpExp(${idx},'amount',this.value)">
+      </div>
+      <div class="item-field">
+        <label>ประเภทเงิน</label>
+        <select onchange="window._app.dmUpExp(${idx},'paymentType',this.value)">
+          <option value="เงินสด" ${(item.paymentType||'เงินสด')==='เงินสด'?'selected':''}>💵 เงินสด</option>
+          <option value="โอน" ${(item.paymentType||'เงินสด')==='โอน'?'selected':''}>📲 โอน</option>
+        </select>
+      </div>
+      <button class="item-del-btn" onclick="window._app.dmDelExp(${idx})">🗑 ลบรายการนี้</button>
+    </div>`).join('');
 }
 
 /* ── Modal field updaters ── */
@@ -922,7 +1057,6 @@ window._app={
 
 /* ── Boot ── */
 (function boot(){
-  // migrate old 'theme' key (dark/light) → new 4-theme key
   const old=localStorage.getItem('theme');
   const saved=localStorage.getItem('spray_theme')||(old==='light'?'gray':old==='dark'?'dark':null)||'dark';
   const t=['beige','glass','gray','dark'].includes(saved)?saved:'dark';
