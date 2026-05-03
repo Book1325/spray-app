@@ -282,16 +282,16 @@ td.act-c{min-width:90px;white-space:nowrap}
 @media(min-width:600px){.overlay{align-items:center}}
 
 /* ── Detail Modal ── */
-.detail-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:calc(100vw - 0px);height:96vh;box-shadow:var(--shadow);transform:translateY(20px);transition:transform .22s;display:flex;flex-direction:column;overflow:hidden}
-@media(min-width:600px){.detail-modal{max-width:820px;border-radius:var(--r);height:min(90vh,820px);transform:scale(.97)}}
+.detail-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:820px;max-height:92vh;overflow-y:auto;overflow-x:hidden;box-shadow:var(--shadow);transform:translateY(20px);transition:transform .22s}
+@media(min-width:600px){.detail-modal{border-radius:var(--r);max-height:88vh;transform:scale(.97)}}
 .overlay.show .detail-modal{transform:none}
 @media(min-width:600px){.overlay.show .detail-modal{transform:scale(1)}}
 
-.dm-header{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg2);z-index:2;flex-shrink:0;overflow:hidden}
+.dm-header{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg2);z-index:2;position:sticky;top:0;overflow:hidden}
 .dm-title{font-size:1rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dm-close{width:32px;height:32px;border:none;background:transparent;color:var(--text3);font-size:1.3rem;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s;flex-shrink:0}
 .dm-close:hover{background:var(--bg3);color:var(--text)}
-.dm-body{padding:18px 20px;flex:1;display:flex;flex-direction:column;gap:18px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;min-height:0;width:100%;box-sizing:border-box;overscroll-behavior:contain}
+.dm-body{padding:18px 20px;display:flex;flex-direction:column;gap:18px;overflow-x:hidden;width:100%;box-sizing:border-box}
 .dm-section{display:flex;flex-direction:column;gap:10px;overflow:hidden;width:100%}
 .dm-sec-title{font-size:.72rem;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .field-group{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -325,7 +325,7 @@ td.act-c{min-width:90px;white-space:nowrap}
 .chk-label{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--text2);cursor:pointer;user-select:none}
 .chk-label input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0}
 
-.dm-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--bg2);flex-shrink:0}
+.dm-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--bg2);position:sticky;bottom:0}
 
 .confirm-modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;max-width:380px;width:90%;box-shadow:var(--shadow);transform:scale(.96);transition:transform .22s}
 .overlay.show .confirm-modal{transform:scale(1)}
@@ -364,33 +364,15 @@ td.act-c{min-width:90px;white-space:nowrap}
   .sc-val{font-size:1.1rem}
   .t-lbl{display:none}
 
-  /* Modal full screen on mobile */
-  .detail-modal{
-    width:100vw;
-    max-width:100vw;
-    height:96vh;
-    border-radius:var(--r) var(--r) 0 0;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-  }
-  .dm-body{
-    overflow-y:auto;
-    overflow-x:hidden;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
-    flex:1;
-    min-height:0;
-  }
+  /* Modal on mobile */
+  .detail-modal{width:100%;max-width:100vw;max-height:96vh;overflow-y:auto;overflow-x:hidden}
+  .dm-body{overflow-x:hidden}
+  .field-group{grid-template-columns:1fr}
   .dm-footer{
-    flex-shrink:0;
     padding:12px 16px;
     padding-bottom:max(12px,env(safe-area-inset-bottom));
   }
-  .dm-header{
-    flex-shrink:0;
-    padding:14px 16px 12px;
-  }
+  .dm-header{padding:14px 16px 12px}
 
   /* Always show cards in modal, hide old table */
   .items-table{display:none}
@@ -814,8 +796,8 @@ function upField(id,field,val){
 }
 
 /* ── Detail Modal ── */
-function openDetail(id){openRowId=id;renderDetailModal();document.getElementById('detailOverlay').classList.add('show');document.body.style.overflow='hidden';}
-function closeDetail(){document.getElementById('detailOverlay').classList.remove('show');openRowId=null;document.body.style.overflow='';renderAll();}
+function openDetail(id){openRowId=id;renderDetailModal();document.getElementById('detailOverlay').classList.add('show');}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('show');openRowId=null;renderAll();}
 
 function renderDetailModal(){
   const row=rows.find(r=>r.id===openRowId);if(!row)return;
@@ -990,8 +972,8 @@ function dmAddExp(){const r=rows.find(x=>x.id===openRowId);if(!r)return;r.expens
 function dmDelExp(idx){const r=rows.find(x=>x.id===openRowId);if(!r)return;r.expenseItems.splice(idx,1);saveNow();rebuildDmExp();updateStats();updateMonthly();}
 
 /* ── Confirm ── */
-function showConfirm(title,msg,cb,okLabel='ยืนยัน'){pendingCf=cb;document.getElementById('cfTitle').textContent=title;document.getElementById('cfMsg').textContent=msg;document.getElementById('cfOkBtn').textContent=okLabel;document.getElementById('confirmOverlay').classList.add('show');document.body.style.overflow='hidden';}
-function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('show');pendingCf=null;if(!document.getElementById('detailOverlay').classList.contains('show'))document.body.style.overflow='';}
+function showConfirm(title,msg,cb,okLabel='ยืนยัน'){pendingCf=cb;document.getElementById('cfTitle').textContent=title;document.getElementById('cfMsg').textContent=msg;document.getElementById('cfOkBtn').textContent=okLabel;document.getElementById('confirmOverlay').classList.add('show');}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('show');pendingCf=null;}
 document.getElementById('cfOkBtn').addEventListener('click',()=>{if(pendingCf)pendingCf();closeConfirm();});
 document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('confirmOverlay'))closeConfirm();});
 
