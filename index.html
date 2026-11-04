@@ -15,15 +15,15 @@
 <button class="add" id="addBtn">＋ เพิ่มคิว</button><div class="overlay" id="overlay"><section class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2 id="modalTitle">เพิ่มคิว</h2><button class="x" id="close">×</button></div>
 <form id="form"><div class="form"><div class="field full"><label for="date">วันที่</label><input id="date" type="date" required></div><div class="field full"><label>รายชื่อช่วงเช้า</label><div class="crew-selected" id="morningSelected"></div><div class="crew-entry"><input id="morningInput" type="text" placeholder="พิมพ์ชื่อ แล้วกดเพิ่ม" autocomplete="off"><button type="button" id="morningAdd">＋ เพิ่มชื่อ</button></div><div class="crew-suggestions" id="morningSuggestions"></div></div><div class="field full"><label>รายชื่อช่วงเย็น</label><div class="crew-selected" id="eveningSelected"></div><div class="crew-entry"><input id="eveningInput" type="text" placeholder="พิมพ์ชื่อ แล้วกดเพิ่ม" autocomplete="off"><button type="button" id="eveningAdd">＋ เพิ่มชื่อ</button></div><div class="crew-suggestions" id="eveningSuggestions"></div></div><div class="field full"><label>รายรับแยกตามคน</label><div id="incomeRows" class="money-rows"></div><button type="button" class="add-row" id="addIncome">＋ เพิ่มคน / รายรับ</button></div><div class="field full"><label>รายจ่าย</label><div id="expenseRows" class="money-rows"></div><button type="button" class="add-row" id="addExpense">＋ เพิ่มรายการรายจ่าย</button></div></div><div class="modal-actions"><button class="cancel" type="button" id="cancel">ยกเลิก</button><button class="save" type="submit">บันทึกคิว</button></div><button type="button" id="delete" class="small del" style="display:none;margin-top:10px;width:100%">ลบคิวนี้</button></form></section></div><div class="due-overlay" id="dueOverlay"><section class="due-modal" role="dialog" aria-modal="true" aria-labelledby="dueTitle"><div class="due-head"><div class="due-icon">฿</div><div class="due-heading"><small>ติดตามการชำระ</small><h2 id="dueTitle">มียอดที่ยังไม่ได้รับ</h2><p>แตะชื่อเพื่อเปิดคิวของวันนั้น</p></div><button class="due-close" id="closeDue" aria-label="ปิด">×</button></div><div class="due-summary" id="dueSummary"></div><div class="due-list" id="dueList"></div></section></div><div class="notice" id="notice"></div>
 <script>
+const PEOPLE_KEY='fieldbook_people_v1';
 const KEY='fieldbook_fresh_v1',months=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],weekdays=['อา','จ','อ','พ','พฤ','ศ','ส'];
 let data=upgrade(read()),cursor=new Date(),selected=iso(new Date()),editing=null,crewState={morning:[],evening:[]},knownNames=readNames();
 function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}}
-const PEOPLE_KEY='fieldbook_people_v1';
-function readNames(){try{return JSON.parse(localStorage.getItem(PEOPLE_KEY)||'[]')}catch{return []}}
+function readNames(){try{let n=JSON.parse(localStorage.getItem(PEOPLE_KEY)||'[]');return Array.isArray(n)?n.filter(x=>typeof x==='string'&&x.trim()):[]}catch{return []}}
 function parseCrew(v){if(Array.isArray(v))return v.map(x=>String(x).trim()).filter(Boolean);return String(v||'').split(/\s*[-–,，、]\s*/).map(x=>x.trim()).filter(Boolean)}
 function crewValue(r,k){let arr=r[k+'Names'];return arr&&arr.length?arr:parseCrew(r[k])}
-function renderCrew(k){let selected=document.getElementById(k+'Selected'),suggestions=document.getElementById(k+'Suggestions');selected.innerHTML='';suggestions.innerHTML='';crewState[k].forEach((name,i)=>{let b=document.createElement('button');b.type='button';b.className='crew-chip';b.textContent=name;let x=document.createElement('span');x.textContent='×';b.append(x);b.onclick=()=>{crewState[k].splice(i,1);renderCrew(k)};selected.append(b)});knownNames.filter(n=>!crewState[k].includes(n)).forEach(name=>{let b=document.createElement('button');b.type='button';b.textContent='+ '+name;b.onclick=()=>{crewState[k].push(name);renderCrew(k)};suggestions.append(b)})}
-function addCrew(k){let input=document.getElementById(k+'Input'),name=input.value.trim();if(!name)return;if(!crewState[k].includes(name))crewState[k].push(name);if(!knownNames.includes(name)){knownNames.unshift(name);localStorage.setItem(PEOPLE_KEY,JSON.stringify(knownNames))}input.value='';renderCrew(k)}
+function renderCrew(k){let selected=document.getElementById(k+'Selected'),suggestions=document.getElementById(k+'Suggestions');selected.innerHTML='';suggestions.innerHTML='';crewState[k].forEach((name,i)=>{let b=document.createElement('button');b.type='button';b.className='crew-chip';b.textContent=name;let x=document.createElement('span');x.textContent='×';b.append(x);b.onclick=()=>{crewState[k].splice(i,1);renderCrew(k)};selected.append(b)});knownNames.filter(n=>!crewState[k].includes(n)).forEach(name=>{let b=document.createElement('button');b.type='button';b.textContent='+ '+name;b.onclick=()=>{crewState[k].push(name);renderCrew(k)};suggestions.append(b)});refreshIncomeNameOptions()}
+function addCrew(k){let input=document.getElementById(k+'Input'),name=input.value.trim();if(!name)return;if(!crewState[k].includes(name))crewState[k].push(name);if(!knownNames.includes(name)){knownNames.unshift(name);try{localStorage.setItem(PEOPLE_KEY,JSON.stringify(knownNames))}catch(e){console.warn('รายชื่อยังบันทึกในเครื่องไม่ได้',e)}}input.value='';renderCrew(k)}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dateTH(s){let d=new Date(s+'T00:00:00');return d.getDate()+' '+months[d.getMonth()]+' '+(d.getFullYear()+543)}
 function amount(v){return Number(String(v||0).replace(/,/g,''))||0}
@@ -36,7 +36,7 @@ function fromOld(r){
  const exp=Array.isArray(r.expenseItems)?r.expenseItems.map(x=>({name:x.name||'',amount:amount(x.amount),paymentType:x.paymentType||'เงินสด'})):[];
  if(!inc.length&&(r.income||r.rai))inc.push({name:'รายรับเดิม',amount:amount(r.income),rai:amount(r.rai),paymentType:'เงินสด',done:!!((st.morning&&st.evening)||(r.morningDone&&r.eveningDone)),paid:!!(st.paid||r.paid)});
  if(!exp.length&&r.expense)exp.push({name:'รายจ่ายเดิม',amount:amount(r.expense),paymentType:'เงินสด'});
- return {date:r.date,morning:r.morning||'',evening:r.evening||'',morningNames:parseCrew(r.morningNames||r.morning),eveningNames:parseCrew(r.eveningNames||r.evening),incomeItems:inc,expenseItems:exp,note:r.note||'',legacy:r};
+ return {date:r.date,morning:r.morning||'',evening:r.evening||'',morningNames:parseCrew(r.morningNames||r.morning),eveningNames:parseCrew(r.eveningNames||r.evening),incomeItems:inc,expenseItems:exp,note:r.note||''};
 }
 function upgrade(raw){
  let out={};if(!raw||typeof raw!=='object')return out;
@@ -49,19 +49,21 @@ function upgrade(raw){
  });
  return out
 }
-function persist(){localStorage.setItem(KEY,JSON.stringify(data));window.fieldbookCloudSave?.(data);render()}
+function persist(){let saved=true;try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){saved=false;console.error('Local save failed',e)}window.fieldbookLocalDirty=true;window.fieldbookCloudSave?.(data);render();if(!saved)toast('บันทึกในเครื่องไม่สำเร็จ · โปรดเปิดผ่านเบราว์เซอร์ปกติ')}
 function toast(s){let n=document.getElementById('notice');n.textContent=s;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),1800)}
-function fromOldRows(rows,merge=true){if(!Array.isArray(rows))throw Error('bad file');let n=0;rows.forEach(r=>{if(!r.date)return;if(merge&&data[r.date])return;data[r.date]=fromOld(r);n++});localStorage.setItem(KEY,JSON.stringify(data));window.fieldbookCloudSave?.(data);render();return n}
-window.fieldbookCloudSetStatus=state=>{let el=document.getElementById('cloudStatus');if(el){el.textContent=state==='online'?'ซิงก์แล้ว':state==='offline'?'ออฟไลน์':'กำลังซิงก์…';el.className='today-pill cloud-status '+state}};
+function fromOldRows(rows,merge=true){if(!Array.isArray(rows))throw Error('bad file');let n=0;rows.forEach(r=>{if(!r.date)return;if(merge&&data[r.date])return;data[r.date]=fromOld(r);n++});try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.error('Local import save failed',e)}window.fieldbookCloudSave?.(data);render();return n}
+let cloudErrorDetail='';window.fieldbookCloudSetStatus=(state,detail)=>{let el=document.getElementById('cloudStatus');if(state==='error'&&detail){cloudErrorDetail=String(detail.code||detail.message||detail).slice(0,220)}if(state==='online')cloudErrorDetail='';if(el){let message=String(detail?.code||detail?.message||detail||'');el.textContent=state==='online'?'ซิงก์แล้ว':state==='error'&&/permission|denied/i.test(message)?'ไม่มีสิทธิ์เขียนข้อมูล':state==='error'&&/network|offline|unavailable|timeout/i.test(message)?'เครือข่ายซิงค์ขัดข้อง':state==='error'?'ซิงค์ไม่สำเร็จ':state==='offline'?'ออฟไลน์':'กำลังซิงก์…';el.title=state==='error'?'แตะเพื่อดูสาเหตุ: '+cloudErrorDetail:'';el.className='today-pill cloud-status '+(state==='error'?'offline':state)}};document.getElementById('cloudStatus').addEventListener('click',()=>{if(cloudErrorDetail)toast('รายละเอียดซิงค์: '+cloudErrorDetail)});
 window.fieldbookCloudReceive=(raw,initial)=>{
  let remote=upgrade(raw),local=data;
- if(initial){let merged={...local,...remote},localOnly=Object.keys(local).some(k=>!remote[k]);data=merged;localStorage.setItem(KEY,JSON.stringify(data));if(!raw||localOnly)window.fieldbookCloudSave?.(data)}
- else {data=remote;localStorage.setItem(KEY,JSON.stringify(data));render()}
+ if(initial){let localDirty=!!window.fieldbookLocalDirty,merged=localDirty?{...remote,...local}:{...local,...remote},localOnly=Object.keys(local).some(k=>!remote[k]);data=merged;try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.error('Local sync cache failed',e)}if(!raw||localOnly||localDirty)window.fieldbookCloudSave?.(data)}
+ else {data=remote;try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.error('Local sync cache failed',e)}render()}
 };
-function initLegacy(){try{if(!Object.keys(data).length){let old=JSON.parse(localStorage.getItem('spray_rows')||'null');if(Array.isArray(old)&&old.length){data=upgrade(old);localStorage.setItem(KEY,JSON.stringify(data));toast('เชื่อมข้อมูลเดิมแล้ว')}}}catch{}}
+function initLegacy(){try{if(!Object.keys(data).length){let old=JSON.parse(localStorage.getItem('spray_rows')||'null');if(Array.isArray(old)&&old.length){data=upgrade(old);try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.error('Legacy migration save failed',e)}toast('เชื่อมข้อมูลเดิมแล้ว')}}}catch{}}
 function makeInput(type,placeholder,value){let el=document.createElement(type==='select'?'select':'input');if(type==='select'){['เงินสด','โอน','ยังไม่รับ'].forEach(v=>{let o=document.createElement('option');o.value=v;o.textContent=v;el.append(o)});el.value=value||'เงินสด';el.className='pay-select'}else{el.type=type;el.placeholder=placeholder;el.value=value??'';if(type==='number'){el.min='0';el.step='any'}}return el}
 function unitInput(value,unit){let wrap=document.createElement('div');wrap.className='unit-input';let input=makeInput('number','',value);let suffix=document.createElement('span');suffix.textContent=unit;wrap.append(input,suffix);return wrap}
-function addMoneyRow(kind,item={}){let root=document.getElementById(kind==='income'?'incomeRows':'expenseRows'),row=document.createElement('div');row.className='money-row '+kind;let fields=document.createElement('div');fields.className='money-fields';fields.append(makeInput('text',kind==='income'?'ชื่อคน':'รายการ',item.name||''),unitInput(item.amount,'บาท'));if(kind==='income')fields.append(unitInput(item.rai,'ไร่'));fields.append(makeInput('select','',item.paymentType));let del=document.createElement('button');del.type='button';del.className='remove-row';del.textContent='ลบ';del.onclick=()=>row.remove();fields.append(del);row.append(fields);if(kind==='income'){let status=document.createElement('div');status.className='person-status';[['done','งานเสร็จแล้ว'],['paid','รับเงินแล้ว']].forEach(([key,label])=>{let l=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.checked=!!item[key];c.dataset.status=key;l.append(c,document.createTextNode(label));status.append(l)});row.append(status)}root.append(row)}
+function makePersonSelect(value=''){let s=document.createElement('select');s.className='person-select';let blank=document.createElement('option');blank.value='';blank.textContent='เลือกชื่อจากคิว';s.append(blank);let names=[...new Set([...crewState.morning,...crewState.evening,...(value?[value]:[])])];names.forEach(name=>{let o=document.createElement('option');o.value=name;o.textContent=name;s.append(o)});s.value=value||'';return s}
+function refreshIncomeNameOptions(){document.querySelectorAll('#incomeRows .person-select').forEach(s=>{let value=s.value;s.replaceChildren();let blank=document.createElement('option');blank.value='';blank.textContent='เลือกชื่อจากคิว';s.append(blank);[...new Set([...crewState.morning,...crewState.evening,...(value?[value]:[])])].forEach(name=>{let o=document.createElement('option');o.value=name;o.textContent=name;s.append(o)});s.value=value})}
+function addMoneyRow(kind,item={}){let root=document.getElementById(kind==='income'?'incomeRows':'expenseRows'),row=document.createElement('div');row.className='money-row '+kind;let fields=document.createElement('div');fields.className='money-fields';fields.append(kind==='income'?makePersonSelect(item.name||''):makeInput('text','รายการ',item.name||''),unitInput(item.amount,'บาท'));if(kind==='income')fields.append(unitInput(item.rai,'ไร่'));fields.append(makeInput('select','',item.paymentType));let del=document.createElement('button');del.type='button';del.className='remove-row';del.textContent='ลบ';del.onclick=()=>row.remove();fields.append(del);row.append(fields);if(kind==='income'){let status=document.createElement('div');status.className='person-status';[['done','งานเสร็จแล้ว'],['paid','รับเงินแล้ว']].forEach(([key,label])=>{let l=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.checked=!!item[key];c.dataset.status=key;l.append(c,document.createTextNode(label));status.append(l)});row.append(status)}root.append(row)}
 function readMoneyRows(kind){
  return [...document.querySelectorAll('#'+(kind==='income'?'incomeRows':'expenseRows')+' .money-row')].map(row=>{
   let i=row.querySelectorAll('.money-fields input,.money-fields select');
@@ -108,28 +110,39 @@ function close(){document.getElementById('overlay').classList.remove('open')}
 document.getElementById('form').onsubmit=e=>{e.preventDefault();let date=document.getElementById('date').value;if(!date)return;if(editing&&editing!==date)delete data[editing];data[date]={date,morningNames:[...crewState.morning],eveningNames:[...crewState.evening],morning:crewState.morning.join(' - '),evening:crewState.evening.join(' - '),incomeItems:readMoneyRows('income'),expenseItems:readMoneyRows('expense')};selected=date;cursor=new Date(date+'T00:00:00');close();persist();toast('บันทึกคิวแล้ว')};
 document.getElementById('delete').onclick=()=>{if(editing&&confirm('ลบคิวนี้หรือไม่?')){delete data[editing];close();persist();toast('ลบคิวแล้ว')}};document.getElementById('addBtn').onclick=()=>open(selected);document.getElementById('morningAdd').onclick=()=>addCrew('morning');document.getElementById('eveningAdd').onclick=()=>addCrew('evening');['morning','evening'].forEach(k=>document.getElementById(k+'Input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCrew(k)}}));document.getElementById('addIncome').onclick=()=>addMoneyRow('income');document.getElementById('addExpense').onclick=()=>addMoneyRow('expense');document.getElementById('close').onclick=document.getElementById('cancel').onclick=close;document.getElementById('overlay').onclick=e=>{if(e.target.id==='overlay')close()};
 document.getElementById('unpaidBtn').onclick=openDue;document.getElementById('closeDue').onclick=closeDue;document.getElementById('dueOverlay').onclick=e=>{if(e.target.id==='dueOverlay')closeDue()};document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();document.getElementById('importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let n=fromOldRows(JSON.parse(await f.text()));toast('นำเข้า '+n+' คิวแล้ว')}catch{toast('ไฟล์ข้อมูลไม่ถูกต้อง')}e.target.value=''};
-document.getElementById('prev').onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()-1,1);render()};document.getElementById('next').onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);render()};document.getElementById('goToday').onclick=()=>{cursor=new Date();selected=iso(cursor);render()};document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();closeDue();}if(e.key==='ArrowLeft'&&!document.querySelector('.overlay.open'))document.getElementById('prev').click();if(e.key==='ArrowRight'&&!document.querySelector('.overlay.open'))document.getElementById('next').click()});initLegacy();localStorage.setItem(KEY,JSON.stringify(data));render();
+document.getElementById('prev').onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()-1,1);render()};document.getElementById('next').onclick=()=>{cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);render()};document.getElementById('goToday').onclick=()=>{cursor=new Date();selected=iso(cursor);render()};document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();closeDue();}if(e.key==='ArrowLeft'&&!document.querySelector('.overlay.open'))document.getElementById('prev').click();if(e.key==='ArrowRight'&&!document.querySelector('.overlay.open'))document.getElementById('next').click()});initLegacy();try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.error('Startup cache save failed',e)}render();
 </script><script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 const config={apiKey:"AIzaSyA-Ma3ZkkPliZ7xFwfwSnM0oUrbI1wnXeQ",authDomain:"spray-app-7b3ed.firebaseapp.com",databaseURL:"https://spray-app-7b3ed-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"spray-app-7b3ed",storageBucket:"spray-app-7b3ed.firebasestorage.app",messagingSenderId:"569965766139",appId:"1:569965766139:web:fd054889fc20fd8e41d75e"};
 try{
+ const [appSdk,dbSdk]=await Promise.all([import("https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js"),import("https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js")]);
+ const {initializeApp}=appSdk,{getDatabase,ref,onValue,set}=dbSdk;
  const app=initializeApp(config),db=getDatabase(app),rowsRef=ref(db,"spray-app/rows");
- let ready=true,queued=null,timer=null,first=true;
+ let queued=null,timer=null,first=true,retryDelay=1000,writeFailed=false;
  window.fieldbookCloudSetStatus("offline");
- window.fieldbookCloudSave=records=>{
-  queued=records;if(!ready)return;clearTimeout(timer);
-  timer=setTimeout(async()=>{
-   const rows=Object.values(queued||{}).map(r=>{
-    const people=r.incomeItems||[],allDone=people.length>0&&people.every(x=>x.done),allPaid=people.length>0&&people.every(x=>x.paid);
-    return {...r,id:r.id||r.date,status:{morning:allDone,evening:allDone,paid:allPaid}};
-   });
-   try{await set(rowsRef,rows.length?rows:null);window.fieldbookCloudSetStatus("online")}
-   catch(e){console.warn("Firebase write failed",e);window.fieldbookCloudSetStatus("offline")}
-  },250)
- };
- onValue(ref(db,".info/connected"),s=>window.fieldbookCloudSetStatus(s.val()?"online":"offline"));
- onValue(rowsRef,s=>{window.fieldbookCloudReceive(s.val(),first);first=false;window.fieldbookCloudSetStatus("online")},e=>{console.warn("Firebase read failed",e);window.fieldbookCloudSetStatus("offline")});
-}catch(e){console.warn("Firebase unavailable",e);window.fieldbookCloudSetStatus("offline")}
+ const toRows=records=>Object.values(records||{}).map(r=>{
+  const people=r.incomeItems||[],allDone=people.length>0&&people.every(x=>x.done),allPaid=people.length>0&&people.every(x=>x.paid);
+  const {legacy,...clean}=r;
+  return {...clean,id:r.id||r.date,status:{morning:allDone,evening:allDone,paid:allPaid}};
+ });
+ const scheduleWrite=(delay=250)=>{clearTimeout(timer);timer=setTimeout(flushWrite,delay)};
+ async function flushWrite(){
+  if(!queued)return;
+  const batch=queued,rows=toRows(batch);
+  window.fieldbookCloudSetStatus("syncing");
+  try{
+   await set(rowsRef,rows.length?rows:null);
+   if(queued===batch){queued=null;window.fieldbookLocalDirty=false;}
+   retryDelay=1000;writeFailed=false;window.fieldbookCloudSetStatus("online");
+   if(queued)scheduleWrite(0);
+  }catch(e){
+   console.error("Firebase write failed; keeping data queued for retry",e);
+   writeFailed=true;window.fieldbookCloudSetStatus("error",e);
+   scheduleWrite(retryDelay);retryDelay=Math.min(retryDelay*2,30000);
+  }
+ }
+ window.fieldbookCloudSave=records=>{queued=JSON.parse(JSON.stringify(records||{}));scheduleWrite()};
+ onValue(ref(db,".info/connected"),s=>{if(!writeFailed)window.fieldbookCloudSetStatus(s.val()?"online":"offline")});
+ onValue(rowsRef,s=>{window.fieldbookCloudReceive(s.val(),first);first=false;if(!writeFailed)window.fieldbookCloudSetStatus("online")},e=>{console.error("Firebase read failed",e);window.fieldbookCloudSetStatus("error",e)});
+}catch(e){console.warn("Firebase unavailable",e);window.fieldbookCloudSetStatus("error",e)}
 </script>
 </body></html>
